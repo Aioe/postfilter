@@ -1,0 +1,57 @@
+How to delete Headers from locally posted articles using the nnrpd perl filter
+
+1. Description
+
+The NNRPD perl filter includes a strange way to delete the headers inside messages sent by local users.
+There're three or four classes of headers and each class requires a different deletion perl command that
+can vary from INN version to version so the only way to know how to delete an header is through the 
+following list:
+
+A. System headers
+
+$system_headers = "^Path|^From|^Newsgroups|^Subject|^Control|^Supersedes|
+		   ^Followup\-To|^Date|^Organization|^Lines|^Sender|^Approved|^Distribution|
+		   ^Expires|^Message\-ID|^References|^Reply\-To|^NNTP\-Posting\-Host|
+		   ^Mime\-Version|^Content\-Type|^Content\-Transfer\-Encoding|^X\-Trace|
+		   ^X\-Complaints\-To|^NNTP\-Posting\-Date|^Xref|^Injector\-Info|^Summary|
+		   ^Keywords|^Date\-Received|^Received|^Posted|^Posting\-Version|
+		   ^Relay\-Version|^Bcc|^To|^CC";
+
+B. User Agent related headers
+
+$user_agents = "^X\-Newsreader|^X\-Mailer|^User\-Agent"; 
+
+C. All other headers unlisted before.
+
+2. Table about allowed deletion methods
+
+|-------------------------------------------------------------|
+|	  	        NNRPD Version Table		      |
+|---|-----------------------|---------------|-----------------|
+| # | 	    Headers         |    INN 2.4    |    INN 2.5      | 
+|---|-----------------------|---------------|-----------------|
+| A | $system_headers       |     undef     |     undef       |
+|---|-----------------------|---------------|-----------------|
+| B | $user_agents          |    delete     |     undef       |
+|---|-----------------------|---------------|-----------------|
+| C | All other headers	    |    delete     | delete or undef |
+|---|-----------------------|---------------|-----------------| 
+
+
+"undef" refers to "$hdr{'somewhat'} = undef;" perl statement.
+"delete" means "delete $hdr{'somewhat'};"
+
+3. Notes
+
+Beware: with inn 2.4, if the perl filter tries to delete an $user_agent header using 'undef'
+        that article will be *rejected* by innd because nnrpd cleans the content of that header
+	without deleting it and innd doesn't accept empty headers.
+
+Beware: with inn 2.4 and 2.5, every attempt to delete one of $system_headers through 'delete' will
+        silently discarded by nnrpd. Simply the 'delete' command will have no effects without
+        any kind of log notice.
+
+Beware: some header (notably From, Newsgroups, Subject, Path, Date and Message-ID) can't
+	be deleted. If the perl filter tries to delete one of them, the article is rejected by innd
+	because some mandatory header is missing. Please note that nnrpd doesn't make any check
+	before deleting some header so there's no automatic way to avoid unwanted rejections.

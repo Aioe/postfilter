@@ -1,0 +1,132 @@
+Postfilter 0.8.1 - README
+
+
+1. Introduction
+
+	postfilter is an antispam filter for InterNetNews, a widely used NNTP server. Unlike cleanfeed - which checks *remote* articles, those 
+	messages sent through other sites - postfilter scans *local* posts and tries to reject spam and various abuses. Even if it's designed for 
+	large sites, notably USENET servers, postfilter *can* be safety used also by small or private hosts that need a less strong protection 
+	against abuses.
+
+	Beware! Postfilter can't be used as a cleanfeed replacement: cleanfeed checks *remote* articles, postfilter *local* ones.
+
+2. Requirements
+
+	2.1 INN >= 2.4.0 compiled with perl support (--with-perl). It's recommended to use INN >= 2.4.4. Everybody should note that postfilter *is* fully
+	    compatible with INN 2.5 even if some new feature of INN isn't still used.
+
+	Beware! Postfilter could be *not* fully compatible with IPv6 at the moment. 
+
+	2.2 The following perl modules:
+
+ 		2.2.1 Date::Parse
+		2.2.2 Net::DNS
+		2.2.3 Digest
+		2.2.4 Digest::HMAC
+		2.2.5 Digest::MD5
+		2.2.6 DBI
+
+3. Features
+
+	3.1 A higly configurable banlist (see banlist.conf(5))
+
+	3.2 DNSBL, URIBL and TOR support
+
+	3.3 The maximum number of
+
+		3.3.1 Messages
+		3.3.2 Bytes
+		3.3.3 Groups
+		3.3.4 Followups
+		3.3.5 Identical messages
+		3.3.6 Rejected messages before being banned
+
+    		can be limited per
+
+		3.3.7 UserID
+		3.3.8 Domain
+		3.3.9 IP address
+
+    		and per *two* units of time (by default: 1 Day and 10 Minutes)
+
+	3.4 Headers can be deeply modified
+
+	3.5 Builtin log system for data that need to be kept for legal reasons (notably sender's IP address of each locally posted message) with
+	    an expernal script (postlegal that is included in this package) which handles these logs (expiration of old logs and searches)
+
+	3.6 A simple and fast dictionary of forbidden words (see badwords.conf)
+
+	3.7 Easy to customize
+
+4. Installation
+
+	4.1 Automatic installation:
+	    
+	    Run as root
+
+		$ rc.news stop		  # Stop INND
+		$ ./postfilter-install -c # Check dependacies
+		$ ./postfilter-install -i # Install postfilter
+		$ rc.news start		  # Start INND
+
+	4.2 Installation by hands
+
+	    Read ./doc/tutorials/how_to_install_postfilter_by_hands.txt
+
+5. Troubleshooting
+
+	5.1 Enable news.debug syslog facility adding the following line in syslog.conf
+
+#-----------------------------------------------------------------
+news.debug                      -/var/log/news/news.debug
+#-----------------------------------------------------------------
+
+	5.2 Check whether postfilter is correctly installed:
+
+        	$ perl -wc [pathfilter]/postfilter/postfilter.pl 
+        	$ postfilter-installer -c
+        	$ su root
+        	$ postfilter-installer -v
+
+	5.3 Restart INND. Please *restart* it instead of reloading the configuration settings.
+
+        	$ su root
+        	$ rc.news stop
+        	$ rc.news start
+
+	5.4 Try to post a test message
+
+		$ telnet localhost 119
+              >>> Trying 127.0.0.1...
+	      >>> Connected to localhost.
+	      >>> Escape character is '^]'.
+	      >>> 200 aioe.org InterNetNews server INN 2.4.5 ready
+	      <<< MODE READER
+	      >>> 200 localhost InterNetNews NNRP server INN 2.4.5 ready (posting ok).
+	      <<< POST
+	      >>> 340 Ok, recommended ID <ha550k$be9$1@aioe.org>
+	      <<< Newsgroups: local.test                           
+	      <<< From: Aioe <estasi@aioe.org>
+	      <<< Subject: test
+	      <<<
+	      <<< This is a test, only a test
+	      <<<.
+	      >>> 240 Article posted <ha550k$be9$1@aioe-casa.aioe.org>
+
+
+	5.5 Read all news.debug informations related with postfilter
+
+        	$ tail -f /var/log/news/news.debug | grep " filter: "
+
+	5.6 If postfilter complaints about configuration errors, read
+
+		$ man postfilter
+		$ man postfilter.conf
+		$ man banlist.conf	
+
+
+	5.7 Those who need help can ask for assistance using:
+
+        	* news://news.software.nntp (an USENET newsgroup)
+        	* news://nntp.aioe.org/aioe.news.helpdesk (a local group)
+

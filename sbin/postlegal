@@ -1,0 +1,705 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use Getopt::Std;
+
+my $file = "/var/spool/news/postfilter/legal.log";
+
+my %options=();
+my %config;
+
+my $name = `whoami`;
+$name =~ s/\n//;
+
+if ( $name ne "root" )
+{
+	 print "Fatal Error: This program must be executed only by root (and can't be executed by $name)\n";
+         exit 5;
+}
+
+
+getopts("SETvrwyxhpsu:m:i:t:d:c:g:",\%options);
+
+
+if (defined $options{'f'})
+{
+        $file = $options{'f'};
+}
+
+if (defined $options{'i'})
+{
+        $config{'ip'} = $options{'i'};
+}
+
+if (defined $options{'m'})
+{
+        $config{'mid'} = $options{'m'};
+}
+
+if (defined $options{'u'})
+{
+        $config{'user'} = $options{'u'};
+}
+
+if (defined $options{'t'})
+{
+	if (  $options{'t'} > 0 )
+	{
+		$config{'time'} = $options{'t'};
+	}
+	else
+	{
+		print "Usage Error: -t requires an UNIX time that is a positive integer number\n";
+		exit(5);
+	}
+}
+
+if (defined $options{'d'})
+{
+        $config{'days'} = $options{'d'};
+}
+if (defined $options{'c'})
+{
+        $config{'country'} = $options{'c'};
+}
+
+
+if (
+	(!defined $options{'S'}) and 
+	(
+		(defined $options{'r'}) or
+		(defined $options{'w'}) or
+		(defined $options{'x'}) or
+		(defined $options{'y'})
+	)
+   )
+{
+	print "Usage Error: options -r -w -x -y requires -S\n";
+	exit 5;
+}
+
+if (
+	(defined $options{'S'}) and 
+	(
+		(!defined $options{'u'}) and (!defined $options{'m'}) and (!defined $options{'i'}) and (!defined $options{'t'})
+	)
+   )
+{
+	print "Usage error: option -S requires -u <user> or -m <message-id> or -i <ip_adddress>  or -t <time>\n";
+	exit(5);        
+}
+
+
+if (
+	(defined $options{'E'}) and 
+	(
+		(!defined $options{'u'}) and 
+		(!defined $options{'m'}) and 
+		(!defined $options{'i'}) and 
+		(!defined $options{'t'}) and
+		(!defined $options{'d'}) and 
+		(!defined $options{'c'}) 
+	)
+   )
+{
+        print "Usage error: option -E requires -u <user> or -m <message-id> or -i <ip_adddress>  or -t <time> or -c <country> or -d <days>\n";
+        exit(5);
+}
+
+
+if (
+	(
+		(defined $options{'E'}) and (defined $options{'S'})
+	) or 
+	(
+		(defined $options{'E'}) and (defined $options{'T'})
+	) or 
+	(
+		(defined $options{'S'}) and (defined $options{'T'})
+	)
+   )
+{
+	print "Usage Error: options -E -S -T can't be used at the same time\n";
+	exit 5;
+}
+
+if ( 
+	(
+		(defined $options{'r'}) and (defined $options{'w'})
+	) or
+	(
+		(defined $options{'r'}) and (defined $options{'y'}) 
+	) or
+	(
+		(defined $options{'w'}) and (defined $options{'y'})
+	)  or
+        (
+                (defined $options{'w'}) and (defined $options{'x'})
+        ) or
+        (
+                (defined $options{'r'}) and (defined $options{'x'})
+        )  or
+        (
+                (defined $options{'y'}) and (defined $options{'x'})
+        )
+
+   )
+{
+	print "Usage Error: options -r and -y and -w and -x can't be used at the same time\n";
+	exit 5;
+}
+
+if ( 
+	(!defined $options{'r'}) and
+	(!defined $options{'w'}) and
+	(!defined $options{'x'}) and
+	(!defined $options{'y'}) 
+   )
+{
+	$options{'w'} = 1;
+}
+
+if (defined $options{'T'})
+{
+	if ( defined $options{'p'} )
+	{
+		&get_stats();
+	}
+
+        if ( defined $options{'s'} )
+        {
+                &get_stats_ip();
+        }
+
+
+	if ( not defined $options{'p'} and not defined $options{'s'} )
+	{
+		print "Usage Error: -T requires at least one among -p\n";
+		exit(5);
+	}
+
+}
+
+if (
+	(
+		(!defined $options{'E'}) and (!defined $options{'T'}) and (!defined $options{'S'})
+        ) or
+	(
+		(defined $options{'h'})
+	)
+   )
+{
+	&print_help();
+	exit(0);
+}
+
+open my $fh, "$file";
+if (!$fh)
+{
+	print "Fatal Error: Unable to open $file!\n";
+	exit(5);
+}
+my @spool = <$fh>;
+close $fh;
+
+
+if (defined $options{'S'})
+{
+	my @results = &search_records();
+
+	if (defined $options{'r'} )
+	{
+		foreach (@results)
+		{
+			print $_;
+		}
+		exit 0;
+	}
+
+	if (defined $options{'w'})
+	{
+		&print_table(@results);
+		exit(0);
+	}
+
+	if (defined $options{'y'})
+	{
+		&print_grouped(0, @results);
+		exit(0);
+	}
+	
+	if (defined $options{'x'})
+        {
+                &print_grouped(1, @results);
+                exit(0);
+        }
+
+}
+
+if (defined $options{'E'})
+{
+	my ($user,$ip,$mexid,$tm,$days,$cty);
+	my @tosave;
+
+	$ip 	= "none";
+	$user	= "none";
+	$mexid  = "none";
+	$tm 	= "none";
+	$days	= "none";
+	$cty	= "none";
+	
+	$user  = $options{'u'} if (defined $options{'u'});
+	$ip    = $options{'i'} if (defined $options{'i'});
+	$mexid = $options{'m'} if (defined $options{'m'});
+	$tm    = $options{'t'} if (defined $options{'t'});
+	$days  = $options{'d'} if (defined $options{'d'});
+	$cty   = $options{'c'} if (defined $options{'c'});
+
+	my $last = &set_expire_legal($user,$ip,$mexid,$tm,$days,$cty);
+
+	print "Last: $last Unix time, MexID $mexid, IP $ip, UserID $user\n" if ($options{'v'});
+
+	my ($total,$saved) = 0;
+
+
+	LINE: foreach (@spool)
+	{
+		$total++;
+		my ($old_time,$old_mexid,$old_ip,$old_user) = split( /\t/, $_ );
+		chop $old_user;
+		
+		if ( $old_time > $last )
+		{
+			if (($mexid ne "none") and ( $old_mexid !~ $mexid ))
+			{
+				push( @tosave, $_ );
+				$saved++;
+				next LINE;
+			}
+	
+			if (($ip ne "none") and ( $old_ip !~ $ip )) 
+                        { 
+                                push( @tosave, $_ );
+				$saved++;
+                                next LINE;
+                        }
+
+			if (($user ne "none") and ( $old_user !~ $user )) 
+                        { 
+                                push( @tosave, $_ );
+				$saved++;
+                                next LINE;
+                        }
+
+			if ( ($mexid eq "none") and ($ip eq "none") and ($user eq "none"))
+			{
+                                push( @tosave, $_ );
+				$saved++;
+                                next LINE;
+
+			}
+
+		}
+
+	}
+
+	my $deleted = $total - $saved;
+
+	print "Total lines $total, $saved saved and $deleted expired\n" if ($options{'v'});
+
+	open my $FILE, ">$file";
+	if (!$FILE)
+	{
+		print "Fatal Error: unable to write data into $file";
+		exit(5);
+	}
+
+	foreach ( @tosave )
+	{
+		print $FILE $_;
+	}
+
+	close $FILE;
+
+
+
+}
+
+
+
+
+sub set_expire_legal($$$$$$)
+{
+	my ($user,$ip,$mexid,$tm,$days,$cty) = @_;
+
+	my $last = 0;
+	my $time = time();
+
+	if (($tm ne "none") and ($tm > 0))
+	{
+		$last = $tm;
+	}
+
+
+	if (($days ne "none") and ($days > 0))
+	{
+		my $temp = $days * 86400;
+		my $tlast = $time - $temp;
+		$last = $tlast if (($last > $tlast) or ($last==0));
+	}
+
+	my $retdays;
+
+	if (($cty ne "none") and (length($cty) == 2))
+	{
+		if (($cty eq "IT") or ($cty eq "DE"))
+		{
+			$retdays = 185;	
+		}
+		elsif ($cty eq "UK")
+		{
+			$retdays = 365;
+		}
+		else
+		{
+			print "Usage Error: option -c requires a two letter countrycode (IT, DE or UK)\n";
+			exit 5;
+		}
+
+		my $temp = $retdays * 86400;
+		my $tlast = $time - $temp;
+	        $last = $tlast if (($last > $tlast) or ($last==0));
+	}
+ 	else
+        { 
+        	if ($cty ne "none")
+		{
+			print "Usage Error: option -c requires a two letter countrycode (IT, DE or UK)\n";
+                	exit 5;
+		}
+        }
+
+	return $last;
+}
+
+
+
+
+
+
+sub search_records()
+{
+	my @results;
+	my %matches;
+
+	$matches{'ip'} = "0";
+	$matches{'user'} = "0";
+	$matches{'mid'} = "0";
+	$matches{'time'} = "0";
+	$matches{'total'} = "0";
+
+	foreach ( @spool )
+	{
+		$matches{'total'}++;
+		my ($time,$mid,$ip,$user) = split(/\t/, $_ );
+		chop $user;
+		if (defined $config{'ip'})
+		{
+			if ( $ip =~ /$config{'ip'}/i )
+			{
+				$matches{'ip'}++;
+                        	push( @results, $_ );
+			}
+		}
+                if (defined $config{'user'})
+                {
+			if ( $user =~ /$config{'user'}/i )
+			{
+                        	$matches{'user'}++;
+                        	push( @results, $_ ) 
+			}
+                }
+                if (defined $config{'mid'})
+                {
+			if ( $mid =~ /$config{'mid'}/i )
+			{
+	                	$matches{'mid'}++;
+                        	push( @results, $_ ) 
+			}
+                }
+
+                if (defined $config{'time'})
+                {
+			if ( $config{'time'} < $time )
+			{
+				$matches{'time'}++;
+                        	push( @results, $_ )
+			}
+                }
+	}
+
+	my $totl = $matches{'ip'} +  $matches{'user'} +  $matches{'mid'} +  $matches{'time'};
+
+	if (defined $options{'v'})
+	{
+		print "Total records $matches{'total'}, total matches $totl, ip address $matches{'ip'}, user $matches{'user'}, mid $matches{'mid'}, time $matches{'time'}\n";
+	}
+
+	if ( $totl == 0 )
+	{
+		print "No matches found\n";
+		exit(0);
+	}
+
+	return @results;
+}
+
+
+sub print_table($)
+{
+	my @rst = @_;
+	my $id = 1;
+
+	print "|------|-------------------|-----------------|--------------------------------------------------------------|--------------------------------|\n";
+	print "|  ID  |       Date        |       IP        |                           Message-ID                         |              UserID            |\n";
+	print "|------|-------------------|-----------------|--------------------------------------------------------------|--------------------------------|\n";
+
+	foreach ( @rst )
+	{
+		my ($time,$mid,$ip,$user) = split(/\t/, $_ );
+		chop $user;
+ 		my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($time);
+                $year -= 100;
+                printf("| %04d | %02d/%02d/%02d %02d:%02d:%02d | ", $id, $mday, $mon, $year, $hour, $min, $sec );
+		print &gen_cell($ip,15);
+		print &gen_cell($mid, 60);
+		print &gen_cell($user,30);
+		print "\n";
+		$id++;
+	}	
+        print "|------|-------------------|-----------------|--------------------------------------------------------------|--------------------------------|\n";
+}
+
+
+sub print_grouped($$)
+{
+	my $tipo = $_[0];
+	shift @_;
+        my @rst = @_;
+        my $id = 1;
+	my %results;
+
+	print "\n";
+
+        foreach ( @rst )
+        {
+                my ($time,$mid,$ip,$user) = split(/\t/, $_ );
+                chop $user;
+
+		my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($time);
+                $year -= 100;
+                my $ora = sprintf("%02d/%02d/%02d %02d:%02d:%02d", $mday, $mon, $year, $hour, $min, $sec );
+		
+		if ($tipo == 0)
+		{
+			$results{$ip} .=   "\t$ora\t$user\t\t\t";
+			$results{$ip} .= "\t" if ( length($user) < 8);
+			$results{$ip} .= "$mid\n";
+
+		}
+
+                if ($tipo == 1)
+                {
+                        $results{$user} .=   "\t$ora\t$ip\t\t\t";
+                        $results{$user} .= "\t" if ( length($ip) < 8);
+                        $results{$user} .= "$mid\n";
+
+                }
+	}
+
+	foreach (keys %results)
+	{
+		print "$_\n";
+		print "$results{$_}\n";
+	}
+
+
+}	
+
+
+
+
+
+sub print_help()
+{
+	print <<EOT;
+postlegal v. 0.8.1 Copyright 2009 Paolo Amoroso <freedom\@aioe.org>
+
+Syntax:
+	postlegal [ -h ]
+	postlegal -S [ -v ][ -r | -w | -y | -x ][ -f <file> ][ -u <user> | -m <message-id> | -i <IP Address> | -t <time> ]
+	postlegal -E [ -v ][ -f <file> ][ -u <user> | -m <Message-ID> | -i <IP Address> | -t <time> | -d <days> | -c <Country> ]
+	postlegal -T [ -p | ]
+
+Main options:
+
+	-S		: Search records inside legal.log
+	-E		: Expire old records inside legal.log
+	-T		: Print statistics about records inside legal.log
+
+
+Search/Expire options:
+
+	-f <file>	: legal.log location (default: /var/spool/news/postfilter/legal.log)
+	-u <user>	: Limit expire/search only to <user> UserID
+	-m <mid>	: Limit expire/search only to Message-IDs that match <mid>
+	-i <IP Address> : Limit expire/search only to those messages sent by <IP Address>
+	-t <time>	: Limit expire/search only to those messages sent after <time> UNIX time (seconds after 1/1/1970)
+
+Expire options:
+
+	-d <days>	: Expire only those articles older than <days> days
+	-c <Country>	: Expire articles in accordance with <Country> national law where <Country> can be:
+			  IT - Italy 	( 6 months)
+			  DE - Germany	( 6 months)
+			  UK - UK	(12 months)
+
+Output options:
+
+	-v		: Be verbose
+	-r		: Print search results in raw format
+	-w 		: Print search results as an ASCII table (default) 
+	-y		: Print search results grouped by IP
+	-x		: Print search results grouped by UserID
+
+
+Statistical options
+	
+	-p		: print a short statistical page about total articles sent per month
+	-s		: print a short statistical page about most frequent sources
+
+EOT
+
+}
+
+
+sub gen_cell($$)
+{
+	my $ip = $_[0];
+	my $space = $_[1];
+	my $output;
+	my $ipl = length($ip);
+        my $sda = int(($space - $ipl)/2);
+        my $sdb = $space - ($sda+$ipl);
+
+        for (; $sda > 0; $sda--)
+        {
+               	$output .=  " ";
+        }
+
+        $output .= "$ip";
+
+        for (; $sdb > 0; $sdb--)
+        {
+        	$output .= " ";
+        }
+
+        $output .= " | ";
+	return $output;
+}
+
+sub get_stats()
+{
+	print "+---------+-------+\n";
+	print "|  Date   | Posts |\n";
+	print "+---------+-------+\n";
+
+	open FILE, "$file" or die "Unable to open $file";
+
+	my $line;
+
+	my $current = -1;
+	my $total = 0;
+	my $old_year;
+
+
+	while ( $line = <FILE> )
+	{
+        	my ($time,$mexid,$ip,$souce) = split("\t", $line );
+        	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($time);
+
+        	$current = $mon if ( $current == -1 );
+
+        	if ($mon == $current)
+        	{
+                	$old_year = $year;
+                	$total++;
+        	}
+        	else
+        	{
+                	&print_results($old_year,$current, $total );
+                	$total = 1;
+                	$current = $mon;
+        	}
+
+	}
+
+	&print_results($old_year,$current, $total );
+	print "+---------+-------+\n";
+
+	close FILE;
+}
+
+sub print_results($$$)
+{
+        my $yr = $_[0];
+        my $mn = $_[1];
+        my $tt = $_[2];
+
+        my $anno = 1900 + $yr;
+        my $mese = $mn + 1;
+
+	
+	printf("| %d/%02d | %05d |\n", $anno, $mese, $tt );
+}
+
+sub get_stats_ip()
+{
+	open FILE, "$file" or die "Unable to open $file";
+
+	my %records;
+	my $line;
+
+        while ( $line = <FILE> )
+        {
+                my ($time,$mexid,$ip,$souce) = split("\t", $line );
+	
+		if ( not defined $records{$ip} )
+		{
+			$records{$ip} = 1;
+		}
+		else
+		{
+			$records{$ip}++;
+		}
+	}
+
+	my $value;
+	my $num = 1;
+
+	print <<EOG;
++-------+-------+---+-------------+
+|  Rank | Posts |   IP Address    |
++-------+-------+-----------------+
+EOG
+
+	foreach $value (sort {$records{$b} <=> $records{$a} }keys %records)
+	{
+    		printf( "| %05d | %05d | %15s |\n", $num, $records{$value}, $value );
+		$num++;
+	}
+
+	print "+-------+-------+-----------------+\n";
+}

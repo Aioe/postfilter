@@ -1,0 +1,332 @@
+.TH banlist.conf 5 "May 19, 2009" "" "Banlist configuration file"
+
+.SH NAME
+banlist.conf - Banlist configuration file
+
+.SH Table of contents
+.P
+1. General Informations
+.br
+2. Action: log
+.br   
+3. Action: drop
+.br   
+4. Action: save
+.br
+5. Action: score
+.br   
+6. Action: setmax
+.br   
+7. Action: sum
+.br   
+8. Action: config
+.br
+
+.SH 1. General Informations
+Postfilter 0.7.2 introduces a new, more powerful and sophisticated banlist.
+This new version replaces the older one and the new file format is not back
+compatible with the previous version. The banlist is a plain test file which
+allows to set rules that determine whether each message has to be accepted or
+rejected by the script and it's usually located at /etc/news/postfilter/
+banlist.conf. This file should be readable only by the user news due security
+reasons.
+Each line which starts with '#' is considered as a comment and also empty lines
+(only '\n') are allowed. All the other lines are treated as rules. Each line
+must include a single rule and each rule must be written on a single line;
+postfilter scans banlist.conf from top to bottom and the rules are processed in
+the same order they have got in that file.
+Each rule is composed by six fields separated by a colon (':') which are always
+mandatory and only the last one, a comment, can be left empty. The format is
+this:
+.br
+.P
+# Comment
+.br
+.P
+key_regexp:value_regexp:action:arg1:arg2:comment
+.br
+.P
+key_regexp and value_regexp are standard perl regular expressions. If the name
+of an header matches key_regexp and its value matches value_regexp, postfilter
+performs the task defined by action using arg1 and arg2 as arguments. If
+key_regexp is "BODY", the body of the article instead of an header is checked
+against value_regexp.
+.br
+.P
+From:spammer\@spam\.com:save:rnews:/tmp/spammer.rnews:Save spam
+.br
+.P
+In this case, all articles which include "spammer@spam.com" in the From header
+are saved in rnews format at the end of a file called /tmp/spammer.rnews which
+is created if it doesn't exist yet (see below for more details). The last field
+is an optional, recommended comment that should describe the meaning of each
+rule.
+.br
+Postfilter recognizes the following actions:
+.br
+1. 
+.B log 
+- Write a log line through syslog or in a file
+.br
+2. 
+.B drop 
+- Reject the post
+.br
+3. 
+.B save 
+- Save the article in various formats
+.br
+4.
+.B score 
+- Assign a numerical score to a variable, clear it or verify whether the current score exceeds the maximum value set by setmax action for that variable
+.br
+5. 
+.B setmax 
+- A maximum score for a variable is defined by this action
+.br
+6. 
+.B sum 
+- Sum to a variable the integer number of
+  1. crossposted groups
+.br
+  2. followups
+.br  
+  3. body lines
+.br
+  4. total bytes
+.br
+  5. bytes used by headers
+.br   
+  6. bytes used by body
+.br  
+  7. config - Change the configuration settings. This option should be handled with care.
+.br
+.SH 2. Action: log
+
+This action writes a line in a log using syslog or writing at the end of a
+custom file. If the first argument (fourth field, usually called arg1) is
+"syslog" the log line is sent to syslog with facility 'LOG_NEWS' and level
+'notice'. In this case, the fifth field (also known as arg2) represents the
+string which will be logged through syslog. This string can include some
+special identifier which is replaced with the contents of some header:
+   1. %M is replaced with Message-ID
+   2. %F with the From
+   3. %N with the contents of Newsgroups
+   4. %P with Path
+   5. %I with the argument of NNTP-Posting-Host
+.br
+.P
+From:hipcrime:log:syslog:Hipcrime is back, article %M:Hipcrime
+.br
+.P
+With this rule, if an article has got a From value which matches "hipcrime",
+postfilter sends a line to syslog with this content: "Hipcrime is back, article
+<message_id>".
+If the first argument (arg1, fourth field) is "file", postfilter writes a line
+at the end of that file defined by the fifth field (arg2). The format of this
+log line is the following:
+banlist_file:line action: Message-ID <message-id>
+This is an example:
+.br
+.P
+From:hipcrime:log:file:/var/log/news/post.log:Log hipcrime
+.br
+.P
+If an article contains the string "hipcrime" inside the argument of From
+header, postfilter appends a line at the end of /var/log/news/post.log; if this
+file doesn't exist, it's automatically created by the script.
+.SH 3. Action: drop
+This action rejects an article. It has got the same syntax of log.
+.br
+.P
+From:hipcrime:drop:syslog:Message %M comes from hipcrime:Log hipcrime
+.br
+.P
+All messages which include "hipcrime" in the From header are rejected and a log
+line is written through syslog with this content: "Message <message-id> comes
+from hipcrime". Since both key_regexp and value_regexp are regular expressions,
+it's possible to create more complex rules:
+.br
+.P
+Newsgroups:it\.test&\,:drop:syslog:Crosspost outside it.test:
+.br
+.P
+If an article includes in the Newsgroups header both "it.test" and a comma -
+which is used to separate the groups inside the headers - it's rejected by
+postfilter. Another example is this one:
+.br
+.P
+From|Reply-To:hipcrime:drop:syslog:Hipcrime again:Log Hipcrime
+.br
+.P
+All articles which include "hipcrime" inside the arguments of From or Reply-To
+are rejected and "Hipcrime again" is logged through syslog.
+
+.SH 4. Action: save
+
+This action saves an article on a file. The first argument - fourth field also
+known as arg1 - determines the format used to save the article, the second one
+- fifth field, arg2 - where the article will be stored on disk. Save supports
+five formats:
+   1. rnews - all articles are saved in a single file which use the format
+      described by rnews man page.
+   2. mbox - all articles are stored in a single file in the standard qmail
+      mbox format.
+   3. message - each article is saved in a single file, one per article
+   4. maildir - each message is saved inside a maildir as a new unread article
+      (maildir/new/ directory is used)
+   5. mail - every post is sent to an external email address
+Some example:
+.br
+.P
+From:Aioe:save:mbox:/tmp/aioe.mbox:
+.br
+From:Aioe:save:maildir:/home/aioe/Maildir/:
+.br
+From:Aioe:save:mail:estasi@aioe.org:
+.br
+.P
+All lines save somewhere each article that includes "Aioe" as argument of From.
+The first one saves those articles in a single file /tmp/aioe.mbox in the
+standard mbox format. Note that this file must be writable by user news. The
+second rule stores the same articles inside a standard maildir which must
+already exist. Each message is saved as a single file inside the directory /
+home/aioe/Maildir/new/ and it's treated by every IMAP server as a new unread
+article. The last line sends each post to estasi@aioe.org using sendmail.
+
+.SH 5. Action: score 
+Postfilter allows to set arbitrary numerical variables. If a variable exceeds
+the score set by $config{'score_banlist'} globally or by setmax for each
+variable, postfilter rejects the article.
+Action score sums the current value of that variable set by arg1 - fourth field
+- to the value shown by arg2 (fifth field).
+.br
+.P
+Newsgroups:it\.test:score:ittest:2:Sum 2 to ittest
+.br
+.P
+If an article is sent to "it.test", this line sums the current value of ittest
+(0 if it doesn't yet exist) to two.
+.br
+.P
+Newsgroups:it\.test:score:ittest:2:
+.br
+Followup-To:it\.test\.moderato:score:ittest:2:
+.br
+Newsgroups:it\.test:setmax:ittest:3:
+.br
+Newsgroups:it\.test:score:verify:ittest:
+.br
+.P
+These lines prevent for posting an article to "it.test" with a followup to
+"it.test.moderato". If an article is sent to "it.test", the first line sums the
+current value of "ittest" to two. "ittest" doesn't exist before, so its value
+is set to 2 (0+2). If the same article includes "it.test.moderato" inside the
+Followup-To header, the second line sums the current value of "ittest" - which
+can be 0 or 2 - to 2. At this point, an article sent only to "it.test" or with
+a followup to "it.test.moderato" but posted in a group different by "it.test"
+has got a value of 2. If an article was posted to "it.test" with a followup to
+"it.test.moderato", "ittest" has got score 4 because both rules match. The
+third line sets the maximum score allowed for that rule. If "ittest" has got a
+value greater than 3, the article is rejected (see below). The fourth line
+isn't mandatory: by default, postfilter checks whether each variable exceeds
+the maximum allowed value after ending to execute the banlist. The special
+keyword verify enforces postfilter to verify if that variable set by arg2
+exceeds its score limit at this time. If "ittest" is greater than 3 (set by
+setmax) that article is rejected without continuing to scan the banlist.
+Negative values allows to provide "AND NOT" clauses:
+.br
+.P
+Newsgroups:it\.test:score:clear:var:
+.br
+Newsgroups:it\.test:score:var:5:
+.br
+Followup-To:.:score:var:-3:
+.br
+Newsgroups:it\.test:setmax:var:3:
+.br
+Newsgroups:it\.test:score:verify:var:
+.br
+.P
+These rules reject every article sent to "it.test" that doesn't include a
+followup header. If an article is sent to "it.test", first of all the value of
+"var" is set to zero by the first rule. This step isn't mandatory and all new
+variables have got a default value of zero before being used. If that article
+is sent to "it.test", due the second line postfilter sums the current value of
+"var", which is always zero at this time, to 5. If a followup exists (dot means
+"every character"), the third line sums -3 to the current value of "var" which
+can be 0 or 5. The third line sets the maximum allowed value for "var". If
+"var" is greater than 3, that article is rejected. If an article is sent to
+"it.test" without a followup, "var" is equal to 5 - which is greater than 3 -
+because only the second rule matches the article. If a followup exists, "var"
+is equal to 2 (5-3) or to -3 (0-3) and that article is accepted. The last line
+verifies "var" without waiting for the end of banlist.
+.SH 6. Action: setmax 
+By default, after ending to scan banlist.conf, postfilter checks whether each
+defined variable exceeds the value set by $config{'score_banlist'}. The action
+setmax sets a different maximum score for a single variable. This option is
+useful because allows to set and modify custom maximum scores for some rule and
+makes possibile to build complex conditional expressions. We recommend to
+always use setmax for each defined variable and to set $config{'score_banlist'}
+to a reasonably high value.
+.br
+.P
+Newsgroups:it\.test:setmax:ittest:5:
+.br
+BODY:pirotti:score:ittest:6:
+.br
+.P
+This example rejects every article sent to "it.test" which includes in the body
+the word "pirotti".
+.SH 7. Action: sum
+The action sum allows to add to a variable the current number of:
+   1. groups - Number of groups included in Newsgroups
+   2. followups - Number of groups included in Followup-To
+   3. lines - Number of lines of body
+   4. total_size - Total article size, in bytes
+   5. head_size - Total headers size, in bytes
+   6. body_size - Total of body size, in bytes
+.br
+.P
+Newsgroups:it\.test:setmax:ittest:1:
+.br
+Newsgroups:it\.test:sum:groups:ittest:
+.br
+Newsgroups:it\.test:score:verify:ittest:
+.br
+Newsgroups:it\.test:score:clear:ittest:
+.br
+Newsgroups:it\.test:sum:followups:ittest:
+.br
+Newsgroups:it\.test:score:verify:ittest
+.br
+.P
+These rules reject every article sent to "it.test" which includes more than a
+single group inside Newsgroups or Followup-To. The first line sets the maximum
+allowed score to 1. The second one sums the current value of ittest to the
+number of groups which are in the Newsgroups header. The third rule verifies
+whether the current value of ittest is greater than the maximum allowed score
+(set by first rule to one) and rejects the article if ittest exceeds the limit.
+The fourth line sets the value of ittest to zero and the sixth one sums to
+ittest the number of groups which are in the Followup-To.
+.SH 8. Action: config 
+.B Beware! 
+An improper use of this action may result
+in a significant loss of privacy for the users and severe misconfigurations.
+The action config allows real time modifications of postfilter's main
+configuration. Every key used in the %config array inside postfilter.conf can
+be altered using this option. With this action, the fourth field - arg1 - must
+include a key and the fifth one - arg2 has to be the new value which will be
+assigned to that key. Postfilter doesn't check whether the value set here is
+valid for the corresponding key and syntax errors can result in strange
+postfilter behaviours or in fatal errors.
+.br
+.P
+Newsgroups:aioe\.test\.tor:config:delete_header_nntp-posting-host:keep:
+.br
+.P
+With this line, all articles sent to "aioe.test.tor" reveal the sender's IP
+address inside the NNTP-Posting-Host. header.
+
+.SH Author
+Paolo Amoroso (Aioe) <freedom@aioe.org>

@@ -1,0 +1,868 @@
+
+.TH postfilter.conf 5 "May 3, 2009" "" "Postfilter main configuration file"
+
+.SH NAME
+postfilter.conf - Postfilter main configuration file
+
+.SH DESCRIPTION
+
+postfilter.conf is the main postfilter configuration file. This file includes all the most important settings and
+.B must be properly configured
+before starting to use postfilter. The default values are set in order to provide the highest antispam and anti-abuse protection even if they 
+are probably too restrictive for sites that use some sort of users authentication. Servers that offer unauthenticated access can use them as
+they are.
+.br
+.B Beware:
+configuration arguments are
+.B case sensitive
+so 'TRUE' and 'true' are 
+.B not
+the same. All postfilter configuration values 
+.B must be
+typed using only
+.B minuscule letters.
+In order to avoid strange and hard to predict behaviours, it's higly recommended to assign a value to all configuration directives that are stored 
+inside
+postfilter.conf. Deletion of configuration keys should be avoided. 
+
+.SH List of all variables
+.P
+The following variables can be configured through postfilter.conf:
+.P
+.td
+
+.B 01.
+$config{'salt'}                            random string 
+.br
+.B 02.
+$config{'server_status'}                   [ 'active' | 'closed' | 'disabled ]
+.br
+.B 03.
+$config{'server_type'}                     [ 'public' | 'auth' | 'both' ]
+.br
+.B 04.
+$config{'enable_domain_check'}             [ 'true' | 'false' ]
+.br
+.B 05.
+$config{'default_action_on_accept'}        [ 'accept' | 'discard' | 'save' | 'reject' ]
+.br
+.B 06.
+$config{'default_action_on_reject'}        [ 'accept' | 'discard' | 'save' | 'reject' ]
+.br
+.B 07.
+$config{'public_user_id'}                  'RegEX'
+.br
+.B 08.
+$config{'reject_on_badwords_error'}        [ 'true' | 'false' ]
+.br
+.B 09.
+$config{'reject_on_banlist_error'}         [ 'true' | 'false' ]
+.br
+.B 10.
+$config{'show_error_code'}                 [ 'true' | 'false' ]
+.br
+.B 11.
+$config{'period'}                          Positive, integer, number of seconds
+.br
+.B 12.
+$config{'short_period'}                    Positive, integer, number of seconds
+.br
+.B 13.
+$config{'trash_period'}                    Positive, integer, number of seconds
+.br
+.B 14.
+$config{'enable_mysql'}                    [ 'true' | 'false' ]
+.br
+.B 15.
+$config{'check_groups_existence'}          [ 'true' | 'false' ]
+.br
+.B 16.
+$config{'check_users'}                     [ 'true' | 'false' ]
+.br
+.B 17.
+$config{'check_tor'}                       [ 'true' | 'false' ]
+.br
+.B 18.
+$config{'tor_network'}                     [ 'allow' | 'reject' | 'mark' ]
+.br
+.B 19.
+$config{'check_white-list'}                [ 'true' | 'false' ]
+.br
+.B 20.
+$config{'check_custom'}                    [ 'true' | 'false' ]
+.br
+.B 21.
+$config{'check_banlist'}                   [ 'true' | 'false' ]
+.br
+.B 22.
+$config{'score_banlist'}                   [ integer number ]
+.br
+.B 23.
+$config{'check_rbl'}                       [ 'true' | 'false' ]
+.br
+.B 24.
+$config{'check_uribl'}                     [ 'true' | 'false' ]
+.br
+.B 25.
+$config{'check_surbl'}                     [ 'true' | 'false' ]
+.br
+.B 26.
+$config{'check_uriblcom'}                  [ 'true' | 'false' ]
+.br
+.B 27.
+$config{'check_badwords'}                  [ 'true' | 'false' ]
+.br
+.B 28.
+$config{'scan_body'}                       [ 'true' | 'false' ]
+.br
+.B 29.
+$config{'max_score_on_body'}               Integer, positive, number
+.br
+.B 30.
+$config{'scan_subject'}                    [ 'true' | 'false' ]
+.br
+.B 31.
+$config{'max_score_on_subject'}            Integer, positive, number
+.br
+.B 32.
+$config{'allow_control_cancel'}            [ 'true' | 'false' ]
+.br
+.B 33.
+$config{'allow_supersedes'}                [ 'true' | 'false' ]
+.br
+.B 34.
+$config{'allow_uuencode'}                  [ 'true' | 'false' ]
+.br
+.B 35.
+$config{'allow_yenc'}                      [ 'true' | 'false' ]
+.br
+.B 36.
+$config{'allow_mail_headers'}              [ 'true' | 'false' ]
+.br
+.B 37.
+$config{'legal_summary'}                   [ 'true' | 'false' ]
+.br
+.B 38.
+$config{'check_distribution'}              [ 'true' | 'false' ]
+.br
+.B 39.
+$config{'max_followup'}                    Positive, integer, number of allowed groups
+.br
+.B 40.
+$config{'max_groups_difference'}           Positive integer number of groups
+.br
+.B 41.
+$config{'max_crosspost'}                   Positive, integer, number of allowed groups
+.br
+.B 42.
+$config{'max_fup_no_crsspt'}               Positive, integer, number of allowed groups
+.br
+.B 43.
+$config{'maximum_multipost'}               an integer positive number
+.br
+.B 44.
+$config{'md5_hash'}                        [ 'body' | 'basic' | 'complex' | 'all' ]
+.br
+.B 45.
+$config{'max_body_size'}                   Positive, integer, number of bytes
+.br
+.B 46.
+$config{'max_head_size'}                   Positive, integer, number of bytes
+.br
+.B 47.
+$config{'max_total_size'}                  Positive, integer, number of bytes
+.br
+.B 48.
+$config{'max_header_length'}               Positive, integer, number of bytes
+.br
+.B 49.
+$config{'max_hierarchies_post'}            Positive, integer, number of hierarchies
+.br
+.B 50.
+$config{'max_hierarchies_followup'}        Positive, integer, number of hierarchies
+.br
+.B 51.
+$config{'max_quoted_ratio'}                Decimal number between 0 and 1
+.br
+.B 52.
+$config{'max_blank_ratio'}                 Decimal number between 0 and 1
+.br
+.B 53.
+$config{'max_empty_ratio'}                 Decimal number between 0 and 1
+.br
+.B 54.
+$config{'max_grace_time'}                  Integer, positive, number of seconds
+.br
+.B 55.
+$config{'too_old_limit'}                   Integer, positive, number of seconds
+.br
+.B 56.
+$config{'max_line_length'}                 Integer, positive, number of characters
+.br
+.B 57.
+$config{'force_default_organization'}      [ 'true' | 'false' ]
+.br
+.B 58.
+$config{'delete_header_x-trace'}           [ 'true' | 'false' ]
+.br
+.B 59.
+$config{'delete_header_sender'}            [ 'true' | 'false' | 'anon' ]
+.br
+.B 60.
+$config{'delete_header_nntp-posting-host'} [ 'true' | 'false' | 'anon' ]
+.br
+.B 61.
+$config{'delete_header_nntp-posting-date'} [ 'true' | 'false' ]
+.br
+.B 62.
+$config{'delete_header_user-agent'}        [ 'true' | 'false' ]
+.br
+.B 63.
+$config{'delete_header_x-no-archive'}      [ 'true' | 'false' ]
+.br
+.B 64.
+$config{'delete_mail_headers'}             [ 'true' | 'false' ]
+.br
+.B 65.
+$config{'delete_custom_headers'}           [ 'true' | 'false' ]
+.br
+.B 66.
+$config{'include_new_headers'}             [ 'true' | 'false' ]
+.br
+.B 67.
+$config{'force_valid_path'}                [ 'true' | 'false' ]
+.br
+.B 68.
+$config{'add_cancel_lock'}                 [ 'true' | 'false' ]
+.br
+.B 69.
+$config{'lock_method'}                     [ 'sha1' | 'md5' ]
+.br
+.SH OPTIONS
+.P
+
+.br
+.B 1. $config{'salt'} -> random string 
+.br
+.P
+A random string needed by postfilter in order to add entropy to NNTP-Posting-Host Md5 sign.
+This random string should be longer than 6 characters and must be changed before starting to
+use postfilter in a production host.
+
+.br
+.B 2. $config{'server_status'} -> [ 'active' | 'closed' | 'disabled ]
+.br
+.P
+Set the server status. A value of 'active' means that all checks are enabled. This is the most
+common configuration value and should almost always be kept. if this is set to  'closed', 
+all messages will be rejected; a value of 'disabled' disable every kind of checks: all
+messages will be always accepted. 'closed' is a fast way to make the server read only without
+touching readers.conf. 'disabled' is dangerous because the server becomes completely open
+and this makes simple large abuses.
+
+.br
+.B 3. $config{'server_type'} -> [ 'public' | 'auth' | 'both' ]
+.br
+.P
+Postfilter is able to detect whether someone has the right to post an article using the client's
+userid or IP address. If the server uses authentication, the users' access rights must be 
+calculated using the client's userid. If the clients aren't authenticated, it's needed to use
+the client's IP address because nnrpd assign to all the same userid.
+If *all* users have got an userid and a password this should be set to 'auth'.
+If all users are unauthenticated, the argument of this key *must* be 'public'.
+If there are both kinds of users, this value has to be 'both'.
+
+.br
+.B 4. $config{'enable_domain_check'} -> [ 'true' | 'false' ]
+.br
+.P
+By default, when authentication isn't used, postfilter checks whether the client's IP address has got
+the right to post the current message. This is made checking how many attempts to post messages were
+made by that IP address in the past and comparing the result with those rules that are set by the hash
+and $config{'server_type'} is set to 'public' or $config{'server_type'} is set to 'both' and the
+current message is sent by an authenticated user, postfilter makes a second check considering the
+client's domain instead of his IP address. A client's domain is the reverse DNS of his IP address
+without the last subdomain (so ip-45-32-135-21.someisp.tld becomes someisp.tld) and it's checked
+against %public_rights_domain that is inside access.conf. This value should be always set to 'false' 
+unless the server is attacked by many different IP addresses that are owned by a single ISP. This
+statement has no effect for authenticated users; a value of 'false' makes useless %public_rights_domain
+
+.br
+.B 5. $config{'default_action_on_accept'} -> [ 'accept' | 'discard' | 'save' | 'reject' ]
+.br
+.P
+This flag controls what postfilter has to do when a message passes all test. The most obvious setting is
+changed by common users. If this is set to 'discard' Postfilter silently drops the post. The server gives 
+back to the client the NNRP success code (240) but the article is discarded. If this setting is set to
+pathspool/postfilter/saved/ without being accepted. With a value of 'reject' Potfilter rejects the article.
+Every value except 'accept' will be probably interpreted by the users as a server defect because the
+success code is returned to the client but the corresponding message doesn't become visibile in the 
+destination groups.       
+Note. Casual users don't need a value different than 'accept'. This feature is mostly useful for honeypot
+servers and in order to study the spam aggressions.
+
+.br
+.B 6. $config{'default_action_on_reject'} -> [ 'accept' | 'discard' | 'save' | 'reject' ]
+.br
+.P
+The postfilter behavior when an article fails the checks is set by this line. Possible values are the
+same of the previous flag. Beware: if this setting is set to everything except 'reject', the client
+will receive an NNRP success code instead an error code and this could encourage spammers to repeat
+the abuses. 
+
+.br
+.B 7. $config{'public_user_id'} -> 'RegEX'
+.br
+.P
+If $config{'server_type'} is set to 'both', postfilter has to determine which users are authenticated.
+This key shows which INND userids describe *public* users. Those names are indicated inside readers.conf
+in the 'default:' key. See readers.conf(5) for details.
+Note: this is a regular expression (it's useful for large sites). This key isn't required if
+
+.br
+.B 8. $config{'reject_on_badwords_error'} -> [ 'true' | 'false' ]
+.br
+.P
+If $config{'reject_on_badwords_error'} is set to 'true', if there's a syntax error inside badwords.conf
+all messages are rejected with the error number 27 (Syntax error in badwords) or 38 (badwords.conf not
+found). If $config{'reject_on_badwords_error'} is set to 'false' and there's an error, postfilter simply
+skips the badwords check logging the error. The default value is set to 'true' due security reason.
+On a side, a value of 'false' avoids that a syntax error inside badwords.conf or banlist.conf closes the
+server since it isn't corrected. On the other side, if it's set to 'false', badwords and banlist checks
+are disabled if a syntax error is found in the corresponding configuration files and this could open some
+security hole if a server massively uses banlists.
+
+.br
+.B 9. $config{'reject_on_banlist_error'} -> [ 'true' | 'false' ]
+.br
+.P
+This statement controls what postfilter has to do if $config{'use_banlist'} is set to 'true' and banlist.conf
+includes some syntax error. If $config{'reject_on_banlist_error'} is set to 'true' and the banlist includes a
+syntax error postfilter rejects ALL incoming articles with the error code 35 ('Syntax error in banlist file')
+else postfilter skips the banlist. BEWARE: if this variable is set to 'true' and there's some syntax error in
+the banlist file, *ALL* articles will be rejected; if it's set to 'false', syntax errors in banlist.conf
+DISABLES the banlist check.
+
+.br
+.B 10. $config{'show_error_code'} -> [ 'true' | 'false' ]
+.br
+.P
+This flag sets whether postfilter has to show in the NNRP response the internal error code. If this is set to
+built using the @quickref array stored inside rules.conf. A value of 'false' makes hard for the sender to understand
+what is wrong in his message. This setting doesn't affect system errors that are always reported in an explicit
+manner in order to help the installation process.
+
+.br
+.B 11. $config{'period'} -> Positive, integer, number of seconds
+.br
+.P
+Postfilter includes several time based barriers against users. This key shows how many seconds
+postfilter has to go back when it verifies the past activities of each user.
+A good value is 86400 (it means: 1 day).
+
+.br
+.B 12. $config{'short_period'} -> Positive, integer, number of seconds
+.br
+.P
+Amount of time used by postfilter to check whether a flood is in progress. A good value for this is
+
+.br
+.B 13. $config{'trash_period'} -> Positive, integer, number of seconds
+.br
+.P
+Postfilter records all attempts to send messages. This key sets how many seconds postfilter has
+to keep these data inside its spool. This value must be greater or equal than $config{'period'}
+A good value is 86400 (1 day), a long amount of time could make postfilter really slow.
+
+.br
+.B 14. $config{'enable_mysql'} -> [ 'true' | 'false' ]
+.br
+.P
+If this is set to 'true', instead of reading its spool from a file, postfilter uses a mysql
+database. If this feature is enabled, %mysql array (see below) must be properly filled with
+the parameters for the mysql connection and the database must be created by hand (see doc/)
+
+.br
+.B 15. $config{'check_groups_existence'} -> [ 'true' | 'false' ]
+.br
+.P
+If an user tries to send a message to a group that is not carried by the server, nnrpd rejects
+it. If an user tries to send a message to an unexistent group and at the same time to a 
+newsgroup that locally exists, it's needed to decide what postfilter has to do. If a value of
+group that isn't locally available. This probably breaks RFC1036 but it's a considerable safer
+behaviour since it prevents the users from posting into unknown and probably unwanted (notably
+pedo) groups. A value of 'false' disables this check. This should be always set to 'true' if
+a strict RFC1036 compliance isn't needed. 
+
+.br
+.B 16. $config{'check_users'} -> [ 'true' | 'false' ]
+.br
+.P
+Postfilter is able to check whether an user has the right to post an article in a time. For
+each IP or userid or domain, postfilter allows to set a maximum number of messages that can
+be posted in two different amounts of time, an amount of identical copies of each article
+that can be posted (multipost) and several other minor configuration settings. All this
+parameters are inside rules.conf that must be configured before starting to seriously use
+postfilter. This statement allows to set whether postfilter has to make this kind of checks:
+a value of 'true' - which is the default and the reccomended choice - enables them, 'false'
+disables any user check. 
+
+.br
+.B 17. $config{'check_tor'}    -> [ 'true' | 'false' ]
+.br
+.P
+Tor is a network of anonymous proxies widely used by spammer and net-abusers. Postfilter is able
+to check whether an article comes from a TOR proxy but this operation requires time since it's needed a
+DNS query for each local IP address. A value of 'true' enables this check, 'false' disables it. 
+It's higly recommended to keep this check active because TOR could become dangerous if TOR clients are
+not controlled in some way. Those who make use of this feature must fill @localip (inside rules.conf) 
+with *all* ip addresses used by he server.
+
+.br
+.B 18. $config{'tor_network'} -> [ 'allow' | 'reject' | 'mark' ]
+.br
+.P
+If $config{'check_tor'} is set to 'true', postfilter checks whether each locally posted article comes
+from a TOR proxy. This key sets what postfilter has to do when it detects an attempt to post an article
+through a TOR proxy. If this is set to 'reject', all articles that come from that network are rejected. 
+This is the safest value because TOR proxies are dangerous unless they're controlled. with 'allow', 
+all messages that come from TOR will be accepted but a notice will be printed in the logs; 
+if it is set to 'mark', articles are accepted but Path: is modified adding 'tor-network' and an extra 
+header 'X-TOR-Router: $node_ip' is added.  
+
+.br
+.B 19. $config{'check_white-list'} -> [ 'true' | 'false' ]
+.br
+.P
+If this variable is set to 'true', the white list is active. The hash %whitelist (see below) determines
+which messages are automatically accepted with no checks. This structure has two elements: a key and a
+regular expression that acts as argument. Every key is an header; if the regular expression matches the
+contents of that header shown by the key, the message is accepted. Note that these articles are *not*
+considered in the count of the accepted messages.
+
+.br
+.B 20. $config{'check_custom'} -> [ 'true' | 'false' ]
+.br
+.P
+Even if postfilter is a general purpose filter, sometimes users could need to add their own code to the 
+nnrpd filter. In order to allow this is a clear and safe manner, postfilter includes a file that is 
+designed like a container for users' custom code (modules/custom.pm). This statement allows to choose
+whether postfilter has to execute that file which includes (or could include) user's custom code. A
+value of 'true' enables this, 'false' disables this kind of checks. Those who don't need to add their
+code to postfilter can safety choose 'false' that makes postfilter a bit faster. Those who need to
+customize postfilter must set this statement to 'true'.
+
+.br
+.B 21. $config{'check_banlist'} -> [ 'true' | 'false' ]
+.br
+.P
+Whether to use the banlist is set by this key. More information about the postfilter banlist are stored
+in the banlist.conf file.
+
+.br
+.B 22. $config{'score_banlist'} -> [ integer number ]
+.br
+.P
+The maximum allowed score in the banlist (this is the default value, see the documentation of
+banlist.conf)
+
+.br
+.B 23. $config{'check_rbl'}    -> [ 'true' | 'false' ]
+.br
+.P
+Postfilter supports DNSBLs. If this parameter is set to 'true', the DNSBL listed in @dnsbl are checked
+against the sender's ip address of each message. Please note that DNSBL check is slow because postfilter
+has to check a single DNSBL per time.
+
+.br
+.B 24. $config{'check_uribl'}    -> [ 'true' | 'false' ]
+.br
+.P
+Whether to check if an URL included in the body of each article is listed by SURBL or URIBL.com (that
+are URIBLs, list that check whether 'urls' included in the body are know to be spam or scam
+
+.br
+.B 25. $config{'check_surbl'}    -> [ 'true' | 'false' ]
+.br
+.P
+Whether to check if an URL included in the body of each article is listed by SURBL URIBL. This requires that
+
+.br
+.B 26. $config{'check_uriblcom'}    -> [ 'true' | 'false' ]
+.br
+.P
+Whether to check if an URL included in the body of each article is listed by URIBL.com URIBL. This requires that
+
+.br
+.B 27. $config{'check_badwords'} -> [ 'true' | 'false' ]
+.br
+.P
+Postfilter includes a (simple) spam dictionary which scans the body and the subject searching for defined
+regular expression (see badwords.conf for details). 'true' activates it, 'false' keeps it inactive.
+
+.br
+.B 28. $config{'scan_body'} -> [ 'true' | 'false' ]
+.br
+.P
+if $config{'use_badwords_scanner'} is set to 'true', this key determines if postfilter has to scan the
+the body searching for spam words: 'true' enables this check, 'false' disables it.
+
+.br
+.B 29. $config{'max_score_on_body'} -> Integer, positive, number
+.br
+.P
+For each spam word, a score is assigned. If the body matches a word, postfilter
+sums this value to the global article score. If the body of an article exceeds the value of this key
+as global score, the script rejects the message (see badwords.conf for details). This flag has effect
+only if $config{'use_badwords_scanner'} and $config{'scan_body'} are set to 'true'.
+
+.br
+.B 30. $config{'scan_subject'} -> [ 'true' | 'false' ]
+.br
+.P
+if $config{'use_badwords_scanner'} is set to 'true', this key determines if postfilter has to scan the
+the subject searching for spam words: 'true' enables this check, 'false' disables it.
+
+.br
+.B 31. $config{'max_score_on_subject'} -> Integer, positive, number
+.br
+.P
+if $config{'use_badwords_scanner'} and $config{'scan_subject'} are set to 'true', this flag determines
+the maximum allowed score on the subject (see badwords.conf for details).
+
+.br
+.B 32. $config{'allow_control_cancel'} -> [ 'true' | 'false' ]
+.br
+.P
+This key sets wheter the control cancel messages are allowed. The value of 'true' authorizes them,
+
+.br
+.B 33. $config{'allow_supersedes'} -> [ 'true' | 'false' ]
+.br
+.P
+Whether an article can include Supersedes, Replaces, Cancels headers that replace an article with another
+
+.br
+.B 34. $config{'allow_uuencode'} -> [ 'true' | 'false' ]
+.br
+.P
+If this is set to 'false' every article that seems to include some UUencoded text in the body is rejected.
+This should be always set to 'false' if it isn't a binary news server.
+
+.br
+.B 35. $config{'allow_yenc'} -> [ 'true' | 'false' ]
+.br
+.P
+If this is set to 'false' every article that seems to include some text in the body encoded with yenc is rejected.
+This should be always set to 'false'  if it isn't a binary news server.
+
+.br
+.B 36. $config{'allow_mail_headers'} -> [ 'true' | 'false' ]
+.br
+.P
+Sometimes, the spammers use a mail to news gateway to inject their messages. If this line is set to
+a value of 'false', all messages which include mail headers are rejected by the server. This value is
+safer but it may produce false positives and it prevents the clients from using mail to news gateways.
+
+.br
+.B 37. $config{'legal_summary'} -> [ 'true' | 'false' ]
+.br
+.P
+Sometimes, a quick log of all accepted messages could be useful. If this key is 'true', for each accepted
+message postfilter writes a line in the file [pathspool]/postfilter/legal.log. Each row shows the mid,
+source ip address, userid and time. 'False' disables this.
+
+.br
+.B 38. $config{'check_distribution'} -> [ 'true' | 'false' ]
+.br
+.P
+If this key is set to 'true' only the distributions included in the array @distributions (see below)
+can be added by the users. If an user includes an argument of the Distribution header which isn't
+included in that array, the script rejects the message. A value of 'false' disables the check.
+
+.br
+.B 39. $config{'max_followup'} -> Positive, integer, number of allowed groups
+.br
+.P
+The maximum number of groups in the 'Followup-To' header is set by this key.
+An acceptable value is 3 groups
+
+.br
+.B 40. $config{'max_groups_difference'} -> Positive integer number of groups
+.br
+.P
+The maximum differences between the number of groups allowed in the Followup header and in
+the crosspost (Newsgroups). The default value is 0 that sets postfilter to reject all articles that
+include more groups in followup than in crosspost.
+
+.br
+.B 41. $config{'max_crosspost'} -> Positive, integer, number of allowed groups
+.br
+.P
+This statement sets how many groups are allowed in the 'Newsgroups' header
+A wise value is 10 (which is the it.* limit)
+
+.br
+.B 42. $config{'max_fup_no_crsspt'} -> Positive, integer, number of allowed groups
+.br
+.P
+This variable fixes how many groups an user may include in the 'Newsgroups' header if (and
+only if) he doesn't include any group in the 'Followup-To'.
+
+.br
+.B 43. $config{'maximum_multipost'} -> an integer positive number
+.br
+.P
+Many spambots sends the same post to many groups. This variable allows to set how many articles
+with the same MD5 hash are allowed. A value of 0 means that no multipost is allowed. A value of 1 means
+that postfilter will accept an article, another article with the same MD5 than will reject every futher
+copy. Please note that it's possible to set a different maximum multipost (only lower than this) for IP,
+domain or UserID separately through postingaccess.conf.
+
+.br
+.B 44. $config{'md5_hash'} -> [ 'body' | 'basic' | 'complex' | 'all' ]
+.br
+.P
+How to generate the MD5 hash that is needed by postfilter to detect multiposts is controlled by this
+variable. 'body' means that only the body of each article will be used for this puropose. This is an
+unsafe option because sometimes it makes some false positive. 'basic' will use Subject and body that
+is probably enough to avoid problems. With 'complex', the MD5 hash is calculated using Newsgroups,
+Subject and body. 'All' will use Subject, Newsgroups, Followup, From and body (this is probably unsafe
+except for authenticated hosts).
+
+.br
+.B 45. $config{'max_body_size'} -> Positive, integer, number of bytes
+.br
+.P
+The body of each message has to be smaller than this value.
+
+.br
+.B 46. $config{'max_head_size'} -> Positive, integer, number of bytes
+.br
+.P
+This statement sets the maximum headers size (how many bytes the headers may weigh in total).
+Sometimes unwise users include strange, large and unuseful headers in their messages. This key
+allows to reject them. Usually the headers are lighter than 1KB and a value of 2048 (2kB) is
+much enough.
+
+.br
+.B 47. $config{'max_total_size'} -> Positive, integer, number of bytes
+.br
+.P
+The total (headers + body) size of each article has to be smaller than this value. Note that this
+value must be smaller or equal than the number assigned to 'localmaxartsize' inside inn.conf
+
+.br
+.B 48. $config{'max_header_length'} -> Positive, integer, number of bytes
+.br
+.P
+This key sets the maximum length that a *single* header can reach. If an article includes an header
+longer than this value (ie. X-Face), it's rejected by the server
+
+.br
+.B 49. $config{'max_hierarchies_post'} -> Positive, integer, number of hierarchies
+.br
+.P
+Sometimes the spammers send a single message to many different hierarchies. The maximum number of
+hierarchies which an user may include in the 'Newsgroups' header is set by this key. A wise value
+is between 1 and 3.
+
+.br
+.B 50. $config{'max_hierarchies_followup'} -> Positive, integer, number of hierarchies
+.br
+.P
+How many hierarchies are allowed in the 'Followup-To' header is fixed by this line.
+
+.br
+.B 51. $config{'max_quoted_ratio'} -> Decimal number between 0 and 1
+.br
+.P
+This statement sets the maximum ratio of quoted lines. A quoted line begins with '>' or '|'. A safe value
+for this key is between 0.6 (60% maximum) and 0.9 (90%).
+
+.br
+.B 52. $config{'max_blank_ratio'} -> Decimal number between 0 and 1
+.br
+.P
+How many lines could be blank in each message is fixed by this key. A blank line begins with a series of
+spaces (' ') and it ends with an LFCR without any other character.
+
+.br
+.B 53. $config{'max_empty_ratio'} -> Decimal number between 0 and 1
+.br
+.P
+This sets the maximum ratio of empty lines. An empty line contains only an 'LFCR'.
+
+.br
+.B 54. $config{'max_grace_time'} -> Integer, positive, number of seconds
+.br
+.P
+The spammers often send messages with a future date in the 'Date' header. Some newsreaders show the most
+recent posts as first messages so a future date allows the spam to remain visible for a longer time.
+This statement fixes the maximum difference in seconds between the server date and the value of 'Date'
+header. A small value may produce false rejections (messages rejected because the client's system clock
+is misconfigured); a larger one is barely helpful. Due timezone issues this should not set to less than
+
+.br
+.B 55. $config{'too_old_limit'} -> Integer, positive, number of seconds
+.br
+.P
+If an article includes a Date header that is older than the number of seconds set here, that message will
+be rejected. This is useful in order to block articles that are too old. The default value is 259200, 3 days.
+
+.br
+.B 56. $config{'max_line_length'} -> Integer, positive, number of characters
+.br
+.P
+The maximum line length is set by this key. The USENET rules fix this limit to 80 characters.
+
+.br
+.B 57. $config{'force_default_organization'} -> [ 'true' | 'false' ]
+.br
+.P
+Sometimes, spammers and trolls add an untrue value for the 'Organization' header in order to cheat the
+users. http://groups-beta.google.com/group/it.scienza.matematica/msg/1c827d61e7495185?dmode=source is
+a sample. If this line is set to 'true', the argument of 'Organization' header is replaced with the
+default one. A value of 'true' is quite rude (the users have the right to insert their own
+organizations) but it's safer.
+
+.br
+.B 58. $config{'delete_header_x-trace'} -> [ 'true' | 'false' ]
+.br
+.P
+NNRPD adds to each locally posted message an header with this scheme:
+X-Trace: Hostname Time Pid Client_IP (Human readable date)
+If this variable is set to 'true', the 'X-Trace' header is stripped off. A value of 'false' keeps it
+untouched.
+
+.br
+.B 59. $config{'delete_header_sender'} -> [ 'true' | 'false' | 'anon' ]
+.br
+.P
+NNRPD adds to each post sent by an authenticated user an header with this scheme:
+Sender: userid@client_domain
+If this variable is set to 'anon' the client_domain is replaced with the server hostname. This makes
+anonymous the 'Sender'. A value of 'true' deletes this header; 'false' keeps it untouched;
+
+.br
+.B 60. $config{'delete_header_nntp-posting-host'} -> [ 'true' | 'false' | 'anon' ]
+.br
+.P
+If 'addnntppostinghost' is set to 'true' inside inn.conf, NNRPD adds to each locally posted message
+an header with this schema:
+NNTP-Posting-Host: Client_Domain
+If this variable is set to 'anon', the script links together the original sender's domain and the
+salt string (see above) than it calculates the MD5 checksum of this string. The server hostname is
+also added on the right in order to make it valid. This is the schema:
+NNTP-Posting-Host: <MD5>.your_server.your_tld
+Every MD5 checksum coincides with only one domain so two messages sent by the same IP have got the
+same encrypted 'NTTP-Posting-Host'. This helps some antispam programs (notably cleanfeed) without
+showing the real sender's domain.
+The value of 'true' deletes this header. We recommend to use 'anon' instead of 'true' in order to
+make easier the antispam checks.
+
+.br
+.B 61. $config{'delete_header_nntp-posting-date'} -> [ 'true' | 'false' ]
+.br
+.P
+if 'addnntppostingdate' is set to 'true' (see inn.conf(5)), NNRPD adds to every locally posted
+message this header:
+NNTP-Posting-Date: Human readable date and time
+The value of 'true' strips this header off the messages. 'false' keeps it untouched.
+
+.br
+.B 62. $config{'delete_header_user-agent'} -> [ 'true' | 'false' ]
+.br
+.P
+Every user has the right to include inside his messages an header - 'User-Agent' - which describes his
+newsreader. Under rare circumstances it may be useful to remove this header from every post. Due an NNRPD
+bug, a value of 'true' replaces the 'User-Agent' content with 'hidden', a value of 'false' keeps it. This
+statement has the same effect also on 'X-Newsreader' header.
+
+.br
+.B 63. $config{'delete_header_x-no-archive'} -> [ 'true' | 'false' ]
+.br
+.P
+X-No-Archive, also known colloquially as xna, is a newsgroup message header field used to prevent a Usenet 
+message from being archived in various servers. It was designed to follow the standard message header protocol, 
+RFC 1036 and 977, used in existing newsgroups. On a side, this protects the clients' privacy because all posts
+marked in this way are deleted after a variable amount of time. On the other side, more anonymity encourages
+more abuses
+
+.br
+.B 64. $config{'delete_mail_headers'} -> [ 'true' | 'false' ]
+.br
+.P
+If a mail to news gateway is running, it's convenient to strip the mail headers off the messages.
+If this key is set to 'true', all mail related headers are removed from each post. A value of 'false'
+preserves them.
+
+.br
+.B 65. $config{'delete_custom_headers'} -> [ 'true' | 'false' ]
+.br
+.P
+If this flag is set to 'true' all headers which aren't included in the @saved_headers array (see below)
+are removed from the messages. A value of 'false' preserves them.
+
+.br
+.B 66. $config{'include_new_headers'} -> [ 'true' | 'false' ]
+.br
+.P
+A value of 'true' adds to every message the custom headers set by %headlist hash (see below). 'False'
+doesn't include them.
+
+.br
+.B 67. $config{'force_valid_path'} -> [ 'true' | 'false' ]
+.br
+.P
+Several abuser try to preload a forged Path: header in their messages. nnrpd can be configured to strip every
+argument of Path: supplied by the users but it's impossible to reject a message with a preloaded path. if
+This check implies that strippath must be set to 'false' inside readers.conf
+
+.br
+.B 68. $config{'add_cancel_lock'} -> [ 'true' | 'false' ]
+.br
+.P
+This sets whether postfilter has to add a 'Cancel-Lock' header to each local message. What a cancel lock
+is and how it works is explained at http://www.templetons.com/usenet-format/howcancel.html. In order to
+be useful, postfilter *must* be configured to accept control cancel ($config{'allow_control_cancel'} or
+supersedes ($config{'allow_supersedes'})
+
+.br
+.B 69. $config{'lock_method'} -> [ 'sha1' | 'md5' ]
+.br
+.P
+A Cancel-Lock or Cancel-Key hash can be generated through two different algorithms: md5 or sha1. This flag sets which one
+has to be used by postfilter. The most common is 'sha1' that should be alway used.
+
+.SH NOTES
+
+Even if it's used like a configuration file, 
+.B postfilter.conf
+is still a perl script that must follow 
+.B all perl syntax rules.
+The easiest way to check whether postfilter.conf follows the perl syntax is through the perl command:
+.br
+.P
+.B # perl -wc postfilter.conf
+.br
+.P
+Postfilter has got a built-in check that 
+.B rejects all incoming messages
+if postfilter.conf includes some syntax error. This is a security feature and it's designed to prevent the postfilter users from accepting unwanted 
+articles due configuration errors. 
+.P
+It's important to remember that postfilter.conf like all other perl modules
+.B must
+end with a costant positive value like the following: 
+.br
+.P
+.B 1;
+.br
+.P
+This file also needs to be readable by the same system user that executes nnrpd, usually news. Postfilter doesn't write data into postfilter.conf.
+
+.SH AUTHOR
+
+Paolo Amoroso <freedom@aioe.org>
+

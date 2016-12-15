@@ -1,0 +1,5 @@
+Postfilter documentation is split among three directories:
+
+Ready to use configuation files:	/usr/share/doc/postfilter/examples 
+SQL Documentation:			/usr/share/doc/postfilter/SQL
+a set of HowTos about postfilter:	/usr/share/doc/postfilter/tutorials

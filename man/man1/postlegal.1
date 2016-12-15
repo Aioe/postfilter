@@ -1,0 +1,237 @@
+.\" Created with manedit by Paolo Amoroso (Aioe)
+.\" 
+.\" 
+.TH "postlegal" "1" "September 6, 2009" "Simple tool for scanning and expiring legal.log" ""
+.SH "NAME"
+Postlegal \- Simple tool for scanning and expiring legal.log
+
+.SH "SYNOPSIS"
+postlegal [ \-h ]
+.br
+.br
+postlegal \-S [ \-v ][ \-r | \-w | \-y | \-x ][ \-f <file> ][ \-u <user> | \-m <message\-id> | \-i <IP Address> | \-t <time> ]
+.br
+.br
+postlegal \-E [ \-v ][ \-f <file> ][ \-u <user> | \-m <Message\-ID> | \-i <IP Address> | \-t <time> | \-d <days> | \-c <Country> ]
+.br
+.br
+postlegal \-T [ \-p | \-s ]
+
+.SH "BACKGROUND"
+In the field of telecommunications, data retention (or data preservation) generally refers to the storage of call detail records (CDRs) of telephony and internet traffic and transaction data (IPDRs) by governments and commercial organisations. On 15 March 2006 the European Union formally adopted Directive 2006/24/EC, on "the retention of data generated or processed in connection with the provision of publicly available electroniccommunications services or of public communications networks and amending Directive 2002/58/EC". This directive was acknowledged by all European States. In USA, the Internet Stopping Adults Facilitating the Exploitation of Today's Youth (SAFETY) Act of 2009 also known as H.R. 1076 and S.436 would require providers of "electronic communication or remote computing services" to "retain for a period of at least two years all records or other information pertaining to the identity of a user of a temporarily assigned network address the service assigns to that user."
+.br 
+This implies that
+.B all
+european and US newsmaster
+.B must
+keep some log for a variable amount of time that varies from State to State. During this time \- which starts when each article is posted \- the police
+has the right to
+.B legally
+request the sender's IP address of each post. Those who refuse to provide this kind of informations when requested by the police
+.B commit a crime punished by almost all States.
+The same crime is also committed by those who
+.B refuse to keep logs
+even if it's made due political reasons.
+
+
+.SH "DESCRIPTION"
+If $config{'legal_summary'} is set to "true" inside postfilter.conf postfilter
+creates a special file \-
+.B legal.log
+\- inside the postfilter spool directory that records for each
+.B locally posted
+article:
+.br 
+
+.br 
+1.
+.B Arrival time
+using the standard UNIX format
+.br 
+2.
+.B Sender's IP Address
+.br 
+3.
+.B Sender's UserID
+.br 
+4.
+.B Message\-ID
+
+This file allows the system administrators to trash the news logs \- notably news.notice \- without loosing those informations that many national laws enforce to save for a defined amount of time. 
+.br
+\fBpostlegal\fR is a tool that is able to make searches among the records stored inside legal.log 
+and it's also designed to provide a simple way to expire those entries that are older than the amount of time required by each national law. if postlegal is used in order to search among the records inside legal.log \- with flag
+.B  \-S 
+\- an an human readable line is printed to
+.B stdout
+for each article that matches the requested criteria (defined by \-m, \-u, \-i and \-t flags). Output format can be customized through \-r \-w, \-x or \-y options. If postlegal is used in order to expire the old records (the flag
+.B \-E
+does this) options \-m, \-u, \-i, \-t, \-d and \-c can be used in order to choose which articles will be expired by the legal spool. At least one of these flags must be specified.
+.SH "MANDATORY OPTIONS"
+.B 
+.IP "\fB\-f\fR \fIfile\fR" 4
+
+This option sets which file will be read or expired by postlegal. The mandatory argument
+.B must be
+the absolute path of
+.B legal.log.
+If this flag is omitted, postlegal will try to open /var/spool/news/postfilter/legal.log and will exit with an error if legal.log isn't 
+there.
+.B Note:
+postlegal needs
+.B write access
+to legal.log in order to
+.B expire
+(flag \-E) the old records; a read only access is enough to search the records inside that file.
+
+.IP "\fB\-S\fR" 4
+postlegal can be used to make searches inside legal.log or to delete old records inside that file. postlegal can't do both things in a time. Option \-S commands postlegal to search inside the logs.
+
+.IP "\fB\-E\fR" 4
+If option \-E is given, postlegal will try to expire old records inside legal.log. One option between \-S and \-E is mandatory and both ones can't be given at the same time.
+
+.IP "\fB\-T\fR" 4
+if option \-T is choosen, postlegal will print some simple statistical data about records stored inside legal.log
+
+
+.IP "\fB\-h\fR" 4
+
+Show a simple help screen with a short description of each flag.
+
+.SH "SEARCH and EXPIRE OPTIONS"
+.B 
+
+.IP "\fB\-u\fR \fIuser\fR" 4
+
+The flag \-u instructs postlegal in in order to
+.B search
+(if \-S is gived) or 
+.B expire
+(if \-E is added)
+those articles sent by \fIuser\fR among all records stored inside legal.log. This flag is mostly useful for sites that offer
+.B authenticated access
+in order to discover which articles were sent by an already known userid that must be inserted as mandatory argument.
+.B user
+can be a regular expression.
+
+.IP "\fB\-i\fR \fIip_address\fR" 4
+All articles sent by that IP (v4 or V6) address identifided by
+.B ip_address
+are printed (\-S) or removed from spool file (\-E) if the flag \-i is given.
+.B ip_address must be
+a complete ip address (ie \-i "87.75.34.64") or a fragment (\-i "87.75") or a perl regular expression ("^[1\-2].")
+.B Note:
+domains can't be used as argument of \-i because postfilter doesn't save them.
+
+.IP "\fB\-m\fR \fIMessage\-ID\fR" 4
+
+If a Message\-ID is known and it's needed to discover who posted that article, the flag
+.B \-m
+allows to search or delete all records that matches
+.B Message\-ID
+as locally posted Message\-ID.
+.B Message\-ID
+can be a full Message\-ID with or without leading ('<') and ending ('>') chars, only a fragment or a perl regular expression.
+
+.IP "\fB\-t\fR \fIUNIXTIME\fR" 4
+if \-t <time> is given, all articles older than <time> will be printed (\-S) or deleted (\-E) by the spool. <time> must be an UNIX timestamp (the integer number of seconds after 01/01/1970).
+
+.IP "\fB\-v\fR" 4
+Print to stdout some extra and useful information. This flag should be not used when postlegal is invoked inside a script.
+
+.SH "STATISTICAL OPTIONS"
+postlegal is able to collect some statistical data from legal.log, if the flag -T is given. Results are printed to stdout in a nice style. 
+ 
+.IP "\fB\-p\fR" 4
+Print a short statistical page about total articles sent per month.
+
+.IP "\fB\-s\fR" 4
+Print a short statistical page about most frequent sources
+
+.SH "EXPIRE OPTIONS"
+.B 
+.IP "\fB\-d\fR \fIDays\fR" 4
+This flag
+.B expire
+all records that are older than
+.B Days
+days. The mandatory argument must be an integer positive number of days.
+.br 
+.B Important notice:
+This feature is
+.B dangerous
+because many States enforce all sites to keep the logs for a minimum amount of time and the deletion before the right time could be considered a 
+crime.
+
+.IP "\fB\-c\fR \fICountry\fR" 4
+
+Since it's known which is the minimum data retention enforced by many States, the flag \-c allows to expire all records that are enough old to be 
+deleted following the national law of some well known State. The argument
+.B Country
+must be one of the following two letter codes:
+.br 
+.br 
+1.
+.B IT
+Italy
+(expire time: 6 months)
+.br 
+2.
+.B DE
+Germany
+(expire time: 6 months)
+.br 
+3.
+.B UK
+(expire time: 12 months)
+.br 
+.B Country
+is case sensitive.
+
+
+.SH "OUTPUT OPTIONS"
+.br 
+if the flag \-S is given, there're four options that allow to customize the output format for data. All these options \fBrequires\fR the options \-S and only one among them can be inserted.
+
+
+.IP "\fB\-r\fR" 4
+.br 
+If \-r is given, records are printed \fBas they're inside legal.log\fR. This flag is mostly used inside scripts or pipes since legal.log format is hard to read by humans.
+.br 
+.IP "\fB\-w\fR" 4
+.br 
+If \-w is given, records are printed \fBinside an ASCII table\fR ordered by time.
+.br 
+.IP "\fB\-x\fR" 4
+.br 
+If \-x is given, records are printed \fBgrouped by UserID\fR. This flag is useless for sites that don't make use of authentication. For each UserID, all source IP addresses, their time and Message\-ID are printed one per line.
+.br 
+.IP "\fB\-y\fR" 4
+.br 
+If \-y is given, records are printed \fBgrouped by source IP address\fR. For each IP address, all sent Message\-IDs, their time and UserID are printed one per line.
+.SH "EXAMPLES"
+.TP 
+Search all articles sent by \fI67.56.89.21\fR inside /news/spool/postfilter/legal.log:
+.br 
+postlegal \-S \-f /news/spool/postfilter/legal.log \-i "67.56.89.21"
+.br 
+.br 
+.TP 
+Search who has posted the article identified by \<hsgsgs@amma.it>\fR as Message\-ID:
+.br 
+postlegal \-S \-f /news/spool/postfilter/legal.log \-m "hsgsgs\@amma.it"
+.br 
+.TP 
+Expire old records in Italy:
+.br 
+postlegal \-E \-f /news/spool/postfilter/legal.log \-c Italy
+.br 
+.TP 
+Expire records older than 90 days
+.br 
+postlegal \-E \-f /news/spool/postfilter/legal.log \-d 90
+
+.SH "AUTHOR"
+Paolo Amoroso <freedom@aioe.org>
+
+

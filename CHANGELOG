@@ -1,0 +1,18 @@
+Postfilter 0.8.1
+
+Enhancements:
+	
+	1. A better installer
+	2. doc/ is now more complete
+	3. postlegal is able to generate statistical data
+
+
+Bugfixes:
+ 
+       1. Postfilter works with INN 2.5	
+
+
+
+
+
+

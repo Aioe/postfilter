@@ -1,0 +1,82 @@
+Postfilter 0.8.1 (30/09/2009)
+
+New Features:
+
+	1. Now postfilter has got an installer - ./postfilter-install.pl - that is able to copy all needed files in the right places
+
+	2. UUEncoded and YENC encoded binaries are separately handled. 
+	   Now $config{'allow_yenc'} permits to allow yenc encoded binaries, $config{'allow_uuencode'} uuencoded messages. 
+
+	3. Postfilter is now shipped with a set of manpages:
+	   postfilter.conf.5 
+	   banlist.conf.5    
+	 
+	4. More documentation in doc/ :
+	   how_to_delete_headers.txt explains the right way to delete headers inside an nnrpd filter script
+  
+	5. X-No-Archive can be deleted 
+	   $config{'delete_header_x-no-archive'} sets whether to keep or delete it
+
+	6. A new set of postfilter.conf statements allows to determine which checks have to be made:
+
+	   $config{’check_users’} 
+           $config{’check_tor’}   
+           $config{’check_custom’}                    
+           $config{’check_banlist’}                   
+           $config{’check_rbl’}                       
+           $config{’check_uribl’}
+	   $config{'check_distribution'}
+	   $config{'check_groups_existence'}
+	   $config{'check_white-list'}
+
+	7. Legal logs - the ones saved inside legal.log - can be handled in a much better way through a new utility, /sbin/postlegal
+	   The old postfilter-legal.pl was removed.
+
+Enhancements:
+	
+	1. Now Postfilter is able to detect whether INN 2.4 or 2.5 is running 
+	   $config{'version'} shows which is the current INN version.
+
+	2. Postfilter can be configured in order to skip URIBL.com or SURBL URIBL check
+	   Now $config{’check_surbl’} enables or disables SURBL check, $config{’check_uriblcom’} controls URIBL.com check
+
+	3. Now postfilter is able to accept, reject or mark all articles that come from TOR. 
+	   Old $config{'block_tor'} was removed.
+	   A new $config{'tor_network'} allows to accept articles that come from TOR nodes ("accept"), to reject them ("reject"),
+           to mark ("mark") each post from TOR inserting a custom header 'X-TOR-Router: TOR_IP' and adding 'tor-network' inside the Path.
+
+	4. 'Domain' based users' access rights check must be explicitly enabled through $config{’enable_domain_check’}
+
+Bugfixes:
+
+	1. A much better MySQL code that correctly handles the errors
+	
+	2. access.pm works much better and it's better factorialized
+
+	3. All modules (modules/*.pm) are fully commented
+
+	4. Postfilter now uses INN::Syslog instead of Sys::Syslog
+
+	5. Now messages that come from stdin (if nnrpd is invoked through command line) are correctly handled
+
+	6. Postfilter skips TOR checks if an article comes from stdin or localhost, 
+	   URIBL checks are skipped if no URI are found inside the body
+
+	7. if custom rules return a code that hasn't got a corresponding error string, a message is printed in the logs and that article is
+           rejected with a generic rejection string ($quickref[63]).
+
+	8. if postfilter is linked to the wrong nnrpd perl filter file (nnrpd_*.pl inside pathfilter), now an error is printed
+           in the logs (news.crit) and an human readable error message is sent to the remote client.
+
+	9. Removed 'hidden' User-Agent because now user agent related headers can be deleted. 
+	   Added a new subroutines that works both with inn 2.4 and 2.5
+
+       10. Now all regular expressions are case insensitive
+
+       11. Only *accepted* articles are counted as multipost
+
+       12. If an article is rejected because it's sent to an unexistent group, the error string shows which is the missing group.
+
+Release Notes:
+
+Not yet

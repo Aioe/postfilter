@@ -1,0 +1,107 @@
+Postfilter ver. 0.8.1
+Copyright 2005-2009 Paolo Amoroso (Aioe) <freedom@aioe.org>
+
+1. Summary
+
+Postfilter is an NNRPD perl filter (filter_nnrpd.pl) which scans the messages sent by local users. 
+It could limit the number of messages per user, IP or domain, provides a set of banlists and could deeply modify the headers. 
+It's designed for large site.
+
+2. Requirements
+
+2.1 INN >= 2.4.0 compiled with perl support (--with-perl). It's recommended to use INN >= 2.4.4
+
+2.2 The following perl modules:
+
+Date::Parse;
+Net::DNS;
+Digest;
+Digest::HMAC;
+Digest::MD5;
+DBI;
+
+3. Installation
+
+3.1 Manual Installation
+
+3.1.1 Edit the top of src/postfilter.pl and set the right innshellconfvar path
+
+3.1.2 Copy the directory ./etc/ in the same directory of all INND configuration files with the name /postfilter/
+
+	$ cp -r etc/ /etc/news/postfilter/
+	$ chown news.news /etc/news/postfilter -R
+
+3.1.3 Change the postfilter configuration (see postfilter.conf(5) and examples in /usr/share/doc/postfilter/examples/postfilter.conf/)
+
+3.1.4 Copy all files in src/ in your pathfilter directory (the same which contains filter_nnrpd.pl). Debian sets this to /etc/news/filter/
+
+	$ mkdir [pathfilter]/postfilter/
+        $ cp -r src/* [pathfilter]/postfilter
+	$ chown news.news [pathfilter]/postfilter/ -R
+
+	Those who need to know where is [pathfilter] can execute (innconfval could be - notably with debian - outside binary paths)
+
+	$ innconfval pathfilter
+
+3.1.5 Make a backup copy of your original filter_nnrpd.pl file than link postfilter.pl to filter_nnrpd.pl
+
+        $ mv [pathfilter]/filter_nnrpd.pl [pathfilter]/filter_nnrpd.pl.backup
+        $ ln -s [pathfilter]/postfilter/postfilter.pl [pathfilter]/filter_nnrpd.pl
+	$ chown news.news [pathfilter]/filter_nnrpd.pl
+
+3.1.6 Create inside your spooldir (usually /var/spool/news/ ) a directory called "postfilter" with a subdir called "saved". This directory must be 
+      writable by 'news' user.
+
+        $ mkdir -p [spooldir]/postfilter/saved
+	$ touch [spooldir]/access.log
+	$ touch [spooldir]/legal.log
+	$ chown news.news -R [spooldir]/postfilter/*
+	$ chmod +w [spooldir]/postfilter/
+
+	Those who need to know where is [pathfilter] can execute (innconfval could be - notably with debian - outside binary paths)
+
+        $ innconfval pathspool
+
+3.1.7 Copy other files in the right location
+
+	$ cp -r man/man1/* /usr/share/man/man1/
+	$ cp -r sbin/* /sbin/
+	$ chown root.root /sbin/postlegal
+	$ chmod +rx /sbin/postlegal 
+
+3.1.8 Try to post a test message than see the news.err syslog file
+
+3.2 Automatic installation
+
+3.2.1 Execute as root
+
+	$ ./postfilter-installer
+
+4. Troubleshooting
+
+4.1 Enable news.debug syslog facility adding the following line in syslog.conf
+
+news.debug                      -/var/log/news/news.debug
+
+4.2 Check whether postfilter is correctly installed:
+
+	$ perl -wc [pathfilter]/postfilter/postfilter.pl 
+	$ postfilter-installer -c
+	$ su root
+	$ postfilter-installer -v
+
+4.2 Restart INND. Please *restart* it instead of reloading the configuration settings.
+
+	$ su root
+	$ rc.news stop
+	$ rc.news start
+
+4.3 Read all news.debug informations related with postfilter
+
+	$ tail -f /var/log/news/news.debug | grep " filter: "
+
+4.4 Those who need help can ask for assistance using:
+
+	* news://news.software.nntp (an USENET newsgroup)
+	* news://nntp.aioe.org/aioe.news.helpdesk (a local group)
+
