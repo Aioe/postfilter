@@ -1,6 +1,6 @@
-# Copyright (c) 2005-2009, Paolo Amoroso (Aioe) <freedom@aioe.org>
+# Copyright (c) 2005-2016, Paolo Amoroso (Aioe) <freedom@aioe.org>
 # All rights reserved.
-# Postfilter (other.pm) version 0.8.1
+# Postfilter (other.pm) version 0.8.2
 
 use Date::Parse;
 use Digest::MD5;
