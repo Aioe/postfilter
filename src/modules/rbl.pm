@@ -354,6 +354,13 @@ sub check_surbl()
 	while ( $body =~ /(http\:\/\/\S+)[\s|\n]/gi )
 	{
 		my $url = $1;
+
+		if ($url !~ /\./)
+		{
+			&log("notice", "$url is not a valid url");
+			next;
+		}
+
 		$number++;
 
 		my $curl = &create_url($url, 2);
