@@ -355,7 +355,7 @@ sub check_surbl()
 	{
 		my $url = $1;
 
-		if ($url !~ /\./)
+		if (($url !~ /\./) or ($url =~ /\/\./) or ($url =~ /\.$/))
 		{
 			&log("notice", "$url is not a valid url");
 			next;
