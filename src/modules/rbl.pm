@@ -272,7 +272,7 @@ sub check_uribl()
 # Check whether the body includes URIs
 #######################
 
-        while ( $body =~ /(http\:\/\/\S+)[\s|\n]/gi )
+        while ( $body =~ /(https?\:\/\/\S+)[\s|\n]/gi )
         {
                 $number++;
 	}
@@ -351,7 +351,7 @@ sub check_surbl()
 # Extract URIs from the body and build the dn used for querying
 #######################
 
-	while ( $body =~ /(http\:\/\/\S+)[\s|\n]/gi )
+	while ( $body =~ /(https?\:\/\/\S+)[\s|\n]/gi )
 	{
 		my $url = $1;
 
@@ -409,7 +409,7 @@ sub check_uriblcom()
 #######################
 
 	my $number;
-	while ( $body =~ /(http\:\/\/\S+)[\s|\n]/gi )
+	while ( $body =~ /(https?:\/\/\S+)[\s|\n]/gi )
 	{
 		my $url = $1;
 		$number++;
@@ -475,7 +475,7 @@ sub create_url($$)
 # Remove useless URI prefix
 #######################
 	
-	$url =~ s/http\:\/\///i;
+	$url =~ s/https?\:\/\///i;
 	$url =~ s/\/.+$//g;
 	$url =~ s/\///g;
 	
