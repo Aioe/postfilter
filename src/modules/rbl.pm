@@ -1,4 +1,4 @@
-# Copyright (c) 2005-2016, Paolo Amoroso (Aioe) <freedom@aioe.org>
+# Copyright (c) 2005-2010, Paolo Amoroso (Aioe) <freedom@aioe.org>
 # All rights reserved.
 # Postfilter (rbl.pm) version 0.8.2
 
@@ -30,6 +30,15 @@ sub rblcheck()
         {
                 &log("notice", "Message comes from stdin, DNSLBL check is not needed" );
         }
+
+######################
+# Message comes from IPv6, no DNSBL needed 
+#####################
+
+	elsif ( $ip =~ /\:/ )
+	{
+		&log( "notice", "Message comes from IPv6 network, DNSBL check disabled" );
+	}
 
 #######################
 # RBL Check
@@ -96,9 +105,19 @@ sub check_tor()
 
 	elsif ( $ip eq "127.0.0.1" )
 	{
-		&log( "notice", "Message comes from $ip that can't be a TOR router or is an onion domain, TOR check is not needed" );
+		&log( "notice", "Message comes from $ip that can't be a TOR router or an onion domain, TOR check is not needed" );
                 return 0;
 	}
+
+######################
+# Message comes from IPv6, no check needed
+#####################
+
+        elsif ( $ip =~ /\:/ )
+        {
+                &log( "notice", "Message comes from IPv6 network, TOR check disabled" );
+        }
+
 
 #######################
 # TOR Check
@@ -109,8 +128,32 @@ sub check_tor()
 		&log( "debug", "Check whether $ip is a TOR exit node" );
 		foreach (@localip)
 		{
-			my @elem = split(/\./, $_ );			# split server ip
-			my $dnsbluri = "119.$elem[3].$elem[2].$elem[1].$elem[0].ip-port.exitlist.torproject.org";
+			my $localport;
+			my @ips = split( /\:/, $_ );			# split server port
+	
+
+			if ( $ips[1] == "" )
+			{
+				&log("notice", "Warning: inside \@localip, $_ doesn't specify a local listening port (host:port)");
+				$localport = "119";
+			}
+			elsif ( ($ips[1] == 0) and ($localport ne "119" )) # invalid port
+			{
+				&log( "debug", "Strange localip port $ips[1], using 119" );
+				$localport = "119";
+			}
+			elsif (($ips[1] < 0) or ( $ips[1] > 65536))
+			{
+				&log( "debug", "Invalid local port $ips[1]: value must be between 1 and 65536" );
+				$localport = "119";
+			} 			
+			else
+			{
+				$localport = $ips[1];
+			}
+
+			my @elem = split(/\./, $ips[0] );			# split server ip
+			my $dnsbluri = "$localport.$elem[3].$elem[2].$elem[1].$elem[0].ip-port.exitlist.torproject.org";
                 	&log( "debug", "Detecting TOR router at $dnsbluri" );
 
 			my $success = DNSBLQuery( $ip, $dnsbluri, ".+" );

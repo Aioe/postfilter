@@ -1,4 +1,4 @@
-# Copyright (c) 2005-2016, Paolo Amoroso (Aioe) <freedom@aioe.org>
+# Copyright (c) 2005-2010, Paolo Amoroso (Aioe) <freedom@aioe.org>
 # All rights reserved.
 # Postfilter (access.pm) version 0.8.2
 
@@ -122,7 +122,7 @@ sub access_control($)
 	my ($host, $time, $pid, $ip, $date, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
         my $arg = $_[0];
 
-        my ( $time_post, $ip_old, $domain_old, $code_old, $size_old, $head_old, $groups_old, $followups_old, $user_old, $md5_old, $md5_mark ) = 0;
+        my ( $time_post, $ip_old, $domain_old, $code_old, $size_old, $head_old, $groups_old, $followups_old, $user_old, $md5_old, $md5_mark, $mid_old ) = 0;
 
         my %access;
         $access{'multipost'} = 0;
@@ -133,15 +133,15 @@ sub access_control($)
 
         foreach ( @access )
         {
-                ( $time_post, $ip_old, $domain_old, $code_old, $size_old, $head_old, $groups_old, $followups_old, $user_old, $md5_old ) = split( "\t", $_, 10 );
-                chop $md5_old;
+                ( $time_post, $ip_old, $domain_old, $code_old, $size_old, $head_old, $groups_old, $followups_old, $user_old, $md5_old, $mid_old ) = split( "\t", $_, 11 );
+                chop $mid_old;
 
 #######################
 # Multipost
 #######################
 
-                $access{'multipost'}++ if ( ($md5_old eq $md5) and ($code_old > 0));
-
+                $access{'multipost'}++ if (($md5_old eq $md5) and ($code_old == 0)); # spammers send articles from varius IP, check must be done regardless source ip
+										     # multipost must be calculated using *accepted* articles only
                 $size_old += $head_old;
 
 #######################
@@ -274,6 +274,8 @@ sub write_access($$)
                 return 1;
         }
 
+	my $mid = $hdr{'Message-ID'};
+
 #######################
 # Write old, unexpired lines
 #######################
@@ -284,7 +286,7 @@ sub write_access($$)
 # Write current line
 #######################
 
-        print $ACCESS  "$time\t$ip\t$domain\t$error_code\t$length\t$head_length\t$gruppi\t$followup\t$user\t$md5\n";
+        print $ACCESS  "$time\t$ip\t$domain\t$error_code\t$length\t$head_length\t$gruppi\t$followup\t$user\t$md5\t$mid\n";
         close $ACCESS;
 
         &log( "debug", "Writing successfully done" );
@@ -314,11 +316,11 @@ sub check_rights($)
 	if ( $arg eq "IP" )
 	{
 		%rights = %public_rights_ip;
-		&log ( "debug", "Checking user's rights: IP $ip" );
+		&log ( "notice", "Checking user's rights: IP $ip" );
 	} elsif ( $arg eq "DN" )
 	{
 		%rights = %public_rights_domain;
-		&log( "debug", "Checking user's rights: Domain $domain" );
+		&log( "notice", "Checking user's rights: Domain $domain" );
 	} elsif ( $arg eq "ID" )
 	{
 		%rights = %auth_rights;
@@ -331,7 +333,7 @@ sub check_rights($)
 #######################
 
         my %access_id = &access_control($arg);
-        &log( "debug", "Multipost:  $access_id{'multipost'}" ); 
+        &log( "notice", "Multipost:  $access_id{'multipost'}" ); 
         if ( $access_id{'multipost'} > $config{'maximum_multipost'} )
         {
  	       &log( "err", "Found $access_id{'multipost'} past articles with the same MD5 hash $md5 (maximum is $config{'maximum_multipost'}), rejected");
@@ -361,7 +363,79 @@ sub check_rights($)
 			&log( "err", "$logerror $_ is $access_id{$_}, maximum allowed is $rights{$_}, rejected" );
        
  	                return 30 if ( $_ eq "multipost" );
-                        return 33;
+			
+			if ( $_ eq "max_articles" )
+			{
+				return 31 if ( $arg eq "IP" );
+				return 32 if ( $arg eq "DN" );
+				return 33 if ( $arg eq "ID" );
+			}
+
+                        if ( $_ eq "max_short_articles" )
+                        {
+                                return 70 if ( $arg eq "IP" );
+                                return 71 if ( $arg eq "DN" );
+                                return 72 if ( $arg eq "ID" );
+                        }
+
+
+			if ( $_ eq "max_total_errors" )
+			{
+				return 64 if ( $arg eq "IP" );
+                                return 65 if ( $arg eq "DN" );
+                                return 66 if ( $arg eq "ID" );
+			}
+                        
+			if ( $_ eq "max_short_errors" )
+                        {
+                                return 67 if ( $arg eq "IP" );
+                                return 68 if ( $arg eq "DN" );
+                                return 69 if ( $arg eq "ID" );
+                        }
+
+                        if ( $_ eq "max_short_size" )
+                        {
+                                return 73 if ( $arg eq "IP" );
+                                return 74 if ( $arg eq "DN" );
+                                return 75 if ( $arg eq "ID" );
+                        }
+
+                        if ( $_ eq "max_total_size" )
+                        {
+                                return 76 if ( $arg eq "IP" );
+                                return 77 if ( $arg eq "DN" );
+                                return 78 if ( $arg eq "ID" );
+                        }
+
+                        if ( $_ eq "max_short_groups" )
+                        {
+                                return 79 if ( $arg eq "IP" );
+                                return 80 if ( $arg eq "DN" );
+                                return 81 if ( $arg eq "ID" );
+                        } 
+
+                        if ( $_ eq "max_total_groups" )
+                        {
+                                return 82 if ( $arg eq "IP" );
+                                return 83 if ( $arg eq "DN" );
+                                return 84 if ( $arg eq "ID" );
+                        }
+
+                        if ( $_ eq "max_short_followups" )
+                        {
+                                return 85 if ( $arg eq "IP" );
+                                return 86 if ( $arg eq "DN" );
+                                return 87 if ( $arg eq "ID" );
+                        } 
+
+                        if ( $_ eq "max_total_followups" )
+                        {
+                                return 88 if ( $arg eq "IP" );
+                                return 89 if ( $arg eq "DN" );
+                                return 90 if ( $arg eq "ID" );
+                        }
+
+
                 }
         }
 	return 0;

@@ -1,4 +1,4 @@
-# Copyright (c) 2005-2016, Paolo Amoroso (Aioe) <freedom@aioe.org>
+# Copyright (c) 2005-2010, Paolo Amoroso (Aioe) <freedom@aioe.org>
 # All rights reserved.
 # Postfilter (style.pm) version 0.8.2
 
@@ -144,6 +144,7 @@ sub style_filter()
                 {
                         if ( $hdr{'Newsgroups'} =~ /$_/i )
                         {
+				&log("err", "Group $_, allowed content types: $extracontent{$_}");
                                 if ( $hdr{'Content-Type'} !~ /$extracontent{$_}/i )
                                 {
                                         &log( "err", "Invalid Content-Type ($hdr{'Content-Type'}), rejected" );
@@ -585,52 +586,6 @@ sub mod_headers()
 	&delete_headers("X-Trace") if ( $config{'delete_header_x-trace'} eq "true" );
 
 #######################
-# Cancel-Lock
-#######################
-
-	if ( $config{'add_cancel_lock'} eq "true" )
-	{
-		my $success;
-		if ( $config{'lock_method'} eq "sha1" )
-		{
-			$success = &add_canlock( $config{'salt'} );
-		}
-		else
-		{
-			$success = &add_canlock( $config{'salt'}, 1 );
-		}
-	}
-
-#######################
-# Cancel-Key
-#######################
-
-	if (
-		( $hdr{'Control'} =~ /^cancel\ /i ) or
-		( $hdr{'Supersedes'} )
-	   )
-	{
-		my ( $control_command, $target_mid );
-		if ( $hdr{'Control'} =~ /^cancel\ /i )
-		{
-			( $control_command, $target_mid ) = split / /, $hdr{'Control'};
-		}
-		elsif ( $hdr{'Supersedes'} )
-		{
-			($target_mid) = $hdr{'Supersedes'};	
-		}
-		
-		if ( $config{'lock_method'} eq "sha1" )
-		{
-			&add_cancelkey( $target_mid, $config{'salt'} );
-		}
-		else
-		{
-			&add_cancelkey( $target_mid, $config{'salt'}, 1 );
-		}
-	}
-
-#######################
 # Sender
 #######################
 
@@ -737,128 +692,5 @@ sub mod_headers()
 
         return  0;
 }
-
-########
-#
-# add_canlock(): Add Cancel-Lock header
-#
-#######
-
-sub add_canlock($$)
-{
-	$modify_headers = 1;
-	my ( $secret, $usemd5 ) = @_;
-	my $lock;
-	$secret || return undef;
-
-        my $id = $hdr{'Message-ID'};
-	&log( "debug", "Adding Cancel-Lock to $id" );
-
-	if ($usemd5) 
-	{
-		$lock = 'md5:' . make_canlock_md5( $secret, $id );
-	}
-	else 
-	{
-		$lock = 'sha1:' . make_canlock_sha1( $secret, $id );
-	}
-
-	my $o = $hdr{'Cancel-Lock'};
-	$hdr{'Cancel-Lock'} = ( $o ? "$o\n\t" : '' ) . $lock;
-
-	return '';
-}
-
-########
-#
-# add_cancelkey(): Add Cancel-Key header
-#
-#######
-
-sub add_cancelkey($$$)
-{
-	$modify_headers = 1;
-	if ( !$hdr{'Cancel-Key'} ) 
-	{
-		my ( $tocancel, $secret, $usemd5 ) = @_;
-		my ($key);
-		&log( "debug", "Adding Cancel-Key for message $tocancel");
-		$secret || return undef;
-
-		if ($usemd5) 
-		{
-			$key = 'md5:' . make_key_md5( $secret, $tocancel );
-		}
-		else 
-		{
-			$key = 'sha1:' . make_key_sha1( $secret, $tocancel );
-		}
-
-		my $o = $hdr{'Cancel-Key'};
-		$hdr{'Cancel-Key'} = ( $o ? "$o\n\t" : '' ) . $key;
-	}
-	return '';
-}
-
-########
-#
-# make_canlock_md5(): Generate Cancel-Lock value using md5
-#
-#######
-
-sub make_canlock_md5($$)
-{
-	my ( $secret, $id ) = @_;
-	my $hash = Digest->new('MD5');
-	$hash->add( make_key_md5( $secret, $id ) );
-	return $hash->b64digest . '==';
-
-}
-
-########
-#
-# make_canlock_sha1(): Generate Cancel-Lock value using sha1
-#
-#######
-
-sub make_canlock_sha1($$)
-{
-	my ( $secret, $id ) = @_;
-	my $hash = Digest->new('SHA-1');
-	$hash->add( make_key_sha1( $secret, $id ) );
-	return $hash->b64digest . '=';
-}
-
-########
-#
-# make_key_md5(): Generate Cancel-Key value using md5
-#
-#######
-
-sub make_key_md5($$) 
-{
-	my ( $secret, $id ) = @_;
-	my $hmac = Digest::HMAC->new( $secret, 'Digest::MD5' );
-	$hmac->add($id);
-	return $hmac->b64digest . '==';
-
-}
-
-########
-#
-# make_key_sha1(): Generate Cancel-Key value using sha1
-#
-#######
-
-sub make_key_sha1($$)
-{
-	my ( $secret, $id ) = @_;
-	my $hmac = Digest::HMAC->new( $secret, 'Digest::SHA1' );
-	$hmac->add($id);
-	return $hmac->b64digest . '=';
-}
-
-
-
 
 1;

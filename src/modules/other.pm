@@ -1,4 +1,4 @@
-# Copyright (c) 2005-2016, Paolo Amoroso (Aioe) <freedom@aioe.org>
+# Copyright (c) 2005-2010, Paolo Amoroso (Aioe) <freedom@aioe.org>
 # All rights reserved.
 # Postfilter (other.pm) version 0.8.2
 
@@ -27,6 +27,8 @@ sub create_cache_header()
 ########################
 
         my ( $host, $time, $pid, $ip, $date ) = split( /\ /, $hdr{'X-Trace'}, 5 );
+	$ip = "127.0.0.1" if ( $ip =~ /\:\:1/ ); # This will be removed as soon as IPv6 support will become stable
+
 
 ########################
 # Client DN

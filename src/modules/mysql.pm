@@ -1,4 +1,4 @@
-# Copyright (c) 2005-2016, Paolo Amoroso (Aioe) <freedom@aioe.org>
+# Copyright (c) 2005-2010, Paolo Amoroso (Aioe) <freedom@aioe.org>
 # All rights reserved.
 # Postfilter (mysql.pm) version 0.8.2
 
