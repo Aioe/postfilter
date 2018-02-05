@@ -355,7 +355,7 @@ sub check_surbl()
 	{
 		my $url = $1;
 
-		if (($url !~ /\./) or ($url =~ /\/\./) or ($url =~ /\.$/))
+		if (($url !~ /\./) or ($url =~ /\/\./) or ($url =~ /\.$/) or ($url =~ /\.\./))
 		{
 			&log("notice", "$url is not a valid url");
 			next;
@@ -413,6 +413,12 @@ sub check_uriblcom()
 	{
 		my $url = $1;
 		$number++;
+
+                if (($url !~ /\./) or ($url =~ /\/\./) or ($url =~ /\.$/) or ($url =~ /\.\./))
+                {
+                        &log("notice", "$url is not a valid url");
+                        next;
+                }
 
 		my $curl = &create_url($url, 2);
 		next if (!$curl);
