@@ -1,6 +1,6 @@
-# Copyright (c) 2005-2009, Paolo Amoroso (Aioe) <freedom@aioe.org>
+# Copyright (c) 2005-2018, Paolo Amoroso (Aioe) <freedom@aioe.org>
 # All rights reserved.
-# Postfilter (banchecks.pm) version 0.8.2
+# Postfilter (banchecks.pm) version 0.8.3
 
 use Date::Parse;
 use Digest;

@@ -1,6 +1,6 @@
-# Copyright (c) 2005-2010, Paolo Amoroso (Aioe) <freedom@aioe.org>
+# Copyright (c) 2005-2018, Paolo Amoroso (Aioe) <freedom@aioe.org>
 # All rights reserved.
-# Postfilter (mysql.pm) version 0.8.2
+# Postfilter (mysql.pm) version 0.8.3
 
 use strict;
 
