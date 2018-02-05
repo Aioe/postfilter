@@ -445,7 +445,7 @@ sub check_uriblcom()
 # Query URIBL.com main list
 #######################
 	
-		$uri = "$curl.multi.uribl.com";
+		$uri = "$curl.black.uribl.com";
 		$status = &URIBLQuery($uri,$url);
 		if ($status != 0)
 		{
