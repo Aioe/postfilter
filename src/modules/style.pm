@@ -579,51 +579,63 @@ sub mod_headers()
 
         $hdr{'Organization'} = $config{'organization'} if ( $config{'force_default_organization'} eq "true" );
        
-#######################
-# X-Trace
-#######################
+######################
+# INN 2.4 & 2.5
+######################
 
-	&delete_headers("X-Trace") if ( $config{'delete_header_x-trace'} eq "true" );
+	if (($config{'Version'} eq "2.4") or ($config{'Version'} eq "2.5"))
+	{
+		&delete_headers("X-Trace") if ( $config{'delete_header_x-trace'} eq "true" );
 
-#######################
-# Sender
-#######################
+        	if ( $hdr{'Sender'} ne "" )
+        	{
+                	&delete_headers("Sender") if ( $config{'delete_header_sender'} eq "true" );
+                	if ( $config{'delete_header_sender'} eq "anon" )
+                	{
+                        	$hdr{'Sender'} = $user . "@" . $host;
+                	}
+        	}
 
-        if ( $hdr{'Sender'} ne "" )
-        {
-                &delete_headers("Sender") if ( $config{'delete_header_sender'} eq "true" );
-                if ( $config{'delete_header_sender'} eq "anon" )
-                {
-                        $hdr{'Sender'} = $user . "@" . $host;
-                }
-        }
+        	if ( $hdr{'NNTP-Posting-Host'} ne "" )
+        	{
+                	&delete_headers("NNTP-Posting-Host") if ( $config{'delete_header_nntp-posting-host'} eq "true" );
+                	if ( $config{'delete_header_nntp-posting-host'} eq "anon" )
+                	{
+                        	my $ctx = Digest::MD5->new;
 
-#######################
-# NNTP-Posting-Host
-#######################
+                        	my $nph = $client_dn . $config{'salt'}; #tnx to marco d'itri
+                        	$ctx->add($nph);
+                        	my $md5_nph = $ctx->b64digest;
+                        	$hdr{'NNTP-Posting-Host'} = $md5_nph . ".user." . $host;
+                	}
+        	}
 
-        if ( $hdr{'NNTP-Posting-Host'} ne "" )
-        {
-                &delete_headers("NNTP-Posting-Host") if ( $config{'delete_header_nntp-posting-host'} eq "true" );
-                if ( $config{'delete_header_nntp-posting-host'} eq "anon" )
-                {
-                        my $ctx = Digest::MD5->new;
 
-                        my $nph = $hdr{'NNTP-Posting-Host'} . $config{'salt'}; #tnx to marco d'itri
-                        $ctx->add($nph);
-                        my $md5_nph = $ctx->b64digest;
-                        $hdr{'NNTP-Posting-Host'} = $md5_nph . ".user." . $host;
-                }
-        }
-
-#######################
-# NNTP-Posting-Date
-#######################
-
-        &delete_headers("NNTP-Posting-Date") if (
+        	&delete_headers("NNTP-Posting-Date") if (
                                                  ( $config{'delete_header_nntp-posting-date'} eq "true" ) and
                                                  ( $hdr{'NNTP-Posting-Date'} ne "" )
                                               );
+#########################
+# INN 2.6
+#########################
+
+	} else {
+
+ 		my $ctx = Digest::MD5->new;
+                my $nph = $client_dn . $config{'salt'}; #tnx to marco d'itri
+                $ctx->add($nph);
+                my $md5_nph = $ctx->b64digest;
+                my $nntph = $md5_nph . ".user." . $host;
+		$hdr{'Injection-Info'} =~ /mail-complaints-to="(.+)"/;
+		my $complaint = $1;		
+		$hdr{'Injection-Info'} = "$host; posting-host=\"$nntph\"; mail-complaints-to=\"$complaint\";"; 		
+
+#Injection-Info: pORTATILE.aioe.org; posting-account="<localhost>"; posting-host="localhost:127.0.0.1";
+#	logging-data="25034"; mail-complaints-to="abuse@aioe.org"
+
+
+
+	}
 
 #######################
 # Custom headers

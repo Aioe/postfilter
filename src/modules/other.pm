@@ -10,7 +10,7 @@ use strict;
 
 our (%hdr, $dbh, @access, $modify_headers, $body, $user, %config, %public_rights_ip, %public_rights_domain, %auth_rights, %ban_limits);
 our (%headlist, @quickref, @saved_headers, %whitelist, @distributions, %mysql, %forbidden_crosspost, %scoreset, %maxscore);
-our (@nomoderation, @htmlallowed, @htmltags, %extracontent, %forbidden_headers, @forbidden_groups,%dnsbl,@localip);
+our (@nomoderation, @htmlallowed, @htmltags, %extracontent, %forbidden_headers, @forbidden_groups,%dnsbl,@localip,%attributes);
 
 ########
 #
@@ -22,19 +22,34 @@ our (@nomoderation, @htmlallowed, @htmltags, %extracontent, %forbidden_headers, 
 sub create_cache_header()
 {
 
-########################
-# Data from X-Trace
-########################
+	my ( $host, $time, $pid, $ip, $date, $client_dn );
 
-        my ( $host, $time, $pid, $ip, $date ) = split( /\ /, $hdr{'X-Trace'}, 5 );
-	$ip = "127.0.0.1" if ( $ip =~ /\:\:1/ ); # This will be removed as soon as IPv6 support will become stable
+	if (($config{'version'} eq "2.4") or ($config{'version'} eq "2.5"))
+	{
+        	( $host, $time, $pid, $ip, $date ) = split( /\ /, $hdr{'X-Trace'}, 5 );
+		$ip = "127.0.0.1" if ( $ip =~ /\:\:1/ ); # This will be removed as soon as IPv6 support will become stable
+        	$client_dn = $hdr{'NNTP-Posting-Host'};
+	} else {
 
+#    filter_post() has access to a global hash %attributes which contains
+#    information about the connection as follows:  $attributes{'hostname'}
+#    will contain the hostname (or the IP address if it does not resolve) of
+#    the client machine, $attributes{'ipaddress'} will contain its IP address
+#    (as a string), $attributes{'port'} will contain the client port (as an
+#    integer), $attributes{'interface'} contains the hostname of the
+#    interface the client connected on, $attributes{'intipaddr'} contains the
+#    IP address (as a string) of the interface the client connected on, and
+#    $attributes{'intport'} contains the port (as an integer) on the
+#    interface the client connected on.
 
-########################
-# Client DN
-########################
+		$time = time();
+		$client_dn = $attributes{'hostname'};
+		$ip = $attributes{'ipaddress'};
+		$host = $attributes{'interface'};
+		$date = $hdr{'Injection-Date'};
+		$pid = 999; #fixme
+	}
 
-        my $client_dn = $hdr{'NNTP-Posting-Host'};
 
 ########################
 # Body Length
@@ -128,7 +143,7 @@ sub create_cache_header()
         my $followup = @followup;
 
         $modify_headers = 1;
-        $hdr{'Cache'} = "$host $time $pid $ip $time $client_dn $length $head_length $md5 $domain $gruppi $followup";
+        $hdr{'Cache'} = "$host $time $pid $ip $date $client_dn $length $head_length $md5 $domain $gruppi $followup";
 
         return 0;
 }
@@ -367,10 +382,9 @@ sub delete_headers($)
                         }
 
 ########################
-# Delete headers with 2.5
+# Delete headers with 2.5 or 2.6
 ########################
-
-                        elsif ( $config{'version'} eq "2.5" )
+                        else
                         { 
                                 $hdr{$_} = undef;
                         }
