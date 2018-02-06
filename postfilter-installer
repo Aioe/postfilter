@@ -7,15 +7,15 @@ my @modules = ( "Net::DNS", "Date::Parse", "Digest ", "Digest::MD5", "Digest::SH
 
 
 my @locations = ( 
-			"/usr/local/bin/   ",
-			"/usr/local/news/bin/ ",  
+			"/usr/local/bin/",
+			"/usr/local/news/bin/",
 			"/usr/lib/news/bin/",  
-			"/usr/bin/         ", 
-			"/usr/news/bin/    ", 	     
-			"/news/bin/        ",  
-			"/bin/             ",
-			"/opt/bin/         ",
-			"/opt/news/bin/    "			
+			"/usr/bin/", 
+			"/usr/news/bin/", 	     
+			"/news/bin/",  
+			"/bin/",
+			"/opt/bin/",
+			"/opt/news/bin/"			
 		);
 
 my $innconfval;
@@ -82,23 +82,23 @@ if ($> != 0)
 
 if (defined $options{'i'} or defined $options{'d'} or defined $options{'v'})
 {
-	print "\nChecking where innshellvar resides:\n\n";
+	print "\nChecking where innconfval resides:\n\n";
 
 	my $tt = 0;
 
 	foreach (@locations)
 	{
 		my $file = "$_/innconfval";
-		print "\t$_ ";
+		print "\t$file... ";
 		if ((-e $file) && (-x $file))
 		{
  			$tt = 1;
 			$innconfval = $file;
-			print "\t\t[ OK ]\n";
+			print "FOUND\n";
 		}
 		else
 		{
-			print "\t\t[ NO ]\n";
+			print "not found\n";
 		}
 	}
 
@@ -304,7 +304,7 @@ if (defined $options{'i'} or defined $options{'d'} or defined $options{'v'})
 	}
 	else
 	{
-		my $pp;
+		my $pp = 0;
 		eval { $pp = readlink("$pathfilter/filter_nnrpd.pl") };
 		if (length($pp) >0) # it's a link
 		{
