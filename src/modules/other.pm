@@ -31,17 +31,6 @@ sub create_cache_header()
         	$client_dn = $hdr{'NNTP-Posting-Host'};
 	} else {
 
-#    filter_post() has access to a global hash %attributes which contains
-#    information about the connection as follows:  $attributes{'hostname'}
-#    will contain the hostname (or the IP address if it does not resolve) of
-#    the client machine, $attributes{'ipaddress'} will contain its IP address
-#    (as a string), $attributes{'port'} will contain the client port (as an
-#    integer), $attributes{'interface'} contains the hostname of the
-#    interface the client connected on, $attributes{'intipaddr'} contains the
-#    IP address (as a string) of the interface the client connected on, and
-#    $attributes{'intport'} contains the port (as an integer) on the
-#    interface the client connected on.
-
 		$time = time();
 		$client_dn = $attributes{'hostname'};
 		$ip = $attributes{'ipaddress'};

@@ -345,7 +345,7 @@ sub style_filter()
 		{
 			my $diff_time = abs($client_time - $time);
                 	&log( "err", "Article posted in the future (difference is $diff_time secs, maximum is $config{'max_grace_time'}), rejected" );
-                	&log( "err", "Date: $hdr{'Date'}, real $hdr{'NNTP-Posting-Date'}, time $time/$client_time" );
+                	&log( "err", "Date: $hdr{'Date'}, real $date, time $time/$client_time" );
                 	return 19;
 		} 
 		else
@@ -360,7 +360,7 @@ sub style_filter()
 		{
 		        my $diff_time = abs($time - $client_time);
 			&log( "err", "Article too old, $diff_time seconds, maximum $config{'too_old_limit'}, rejected" );
-			&log( "err", "Date: $hdr{'Date'}, real $hdr{'NNTP-Posting-Date'}, time $time/$client_time" );
+			&log( "err", "Date: $hdr{'Date'}, real $date, time $time/$client_time" );
 			return 58;
 		}
 	}
@@ -589,17 +589,21 @@ sub mod_headers()
 
         	if ( $hdr{'Sender'} ne "" )
         	{
-                	&delete_headers("Sender") if ( $config{'delete_header_sender'} eq "true" );
+                	&delete_headers("Sender") if ( $config{'delete-sender'} eq "true" );
                 	if ( $config{'delete_header_sender'} eq "anon" )
                 	{
-                        	$hdr{'Sender'} = $user . "@" . $host;
+				my $ctz = Digest::MD5->new;
+                                my $zzz = $user . "@". $host . $config{'salt'}; #tnx to marco d'itri
+                                $ctz->add($zzz);
+                                my $md5_sender = $ctz->b64digest;
+                        	$hdr{'Sender'} = $md5_sender;
                 	}
         	}
 
         	if ( $hdr{'NNTP-Posting-Host'} ne "" )
         	{
-                	&delete_headers("NNTP-Posting-Host") if ( $config{'delete_header_nntp-posting-host'} eq "true" );
-                	if ( $config{'delete_header_nntp-posting-host'} eq "anon" )
+                	&delete_headers("NNTP-Posting-Host") if ( $config{'delete-posting-host'} eq "true" );
+                	if ( $config{'delete-posting-host'} eq "anon" )
                 	{
                         	my $ctx = Digest::MD5->new;
 
@@ -628,7 +632,30 @@ sub mod_headers()
                 my $nntph = $md5_nph . ".user." . $host;
 		$hdr{'Injection-Info'} =~ /mail-complaints-to="(.+)"/;
 		my $complaint = $1;		
-		$hdr{'Injection-Info'} = "$host; posting-host=\"$nntph\"; mail-complaints-to=\"$complaint\";"; 		
+		$hdr{'Injection-Info'} =~ /posting-account="(.+)"/;
+		my $postsender = $1;	
+
+		if ( $config{'delete-posting-host'} eq "anon" )
+		{
+			$hdr{'Injection-Info'} = "$host; posting-host=\"$nntph\"; mail-complaints-to=\"$complaint\";"; 		
+		} elsif ($config{'delete-posting-host'} eq "true" )
+		{
+			$hdr{'Injection-Info'} = "$host; mail-complaints-to=\"$complaint\";";
+		}
+
+		if ( $config{'delete-sender'} eq "false" )
+		{
+			$hdr{'Injection-Info'} .= " posting-account=\"$postsender\";";
+		} elsif ( $config{'delete-sender'} eq "anon" )
+		{
+                        my $ctz = Digest::MD5->new;
+                        my $zzz = $user . "@". $host . $config{'salt'}; #tnx to marco d'itri
+                        $ctz->add($zzz);
+                        my $md5_sender = $ctz->b64digest;
+			$hdr{'Injection-Info'} .= " posting-account=\"$md5_sender\";";
+		}
+
+
 
 #Injection-Info: pORTATILE.aioe.org; posting-account="<localhost>"; posting-host="localhost:127.0.0.1";
 #	logging-data="25034"; mail-complaints-to="abuse@aioe.org"
