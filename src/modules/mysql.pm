@@ -26,7 +26,7 @@ our (@nomoderation, @htmlallowed, @htmltags, %extracontent, %forbidden_headers, 
 
 sub mysql_init()
 {
-		my ($host, $time, $pid, $ip, $date, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
+		my ($host, $time, $pid, $ip, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
 		&log( "debug", "Trying to connect MYSQL server $mysql{'server'}, user $mysql{'user'}, database $mysql{'database'}" );
 
 #######################

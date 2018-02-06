@@ -31,7 +31,8 @@ sub init_filter()
 #######################
 
 	&create_cache_header();
-	my ($host, $time, $pid, $ip, $date, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
+
+	my ($host, $time, $pid, $ip, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
 	my $mid = $hdr{'Message-ID'};
 
 	&log( "notice", "Analyzing message $mid, MD5 $md5");
@@ -73,7 +74,7 @@ sub init_filter()
 
 sub check_user()
 {
-	my ($host, $time, $pid, $ip, $date, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
+	my ($host, $time, $pid, $ip, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
 
 #######################
 # Authenticated user...
@@ -119,7 +120,7 @@ sub check_user()
 
 sub access_control($)
 {
-	my ($host, $time, $pid, $ip, $date, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
+	my ($host, $time, $pid, $ip, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
         my $arg = $_[0];
 
         my ( $time_post, $ip_old, $domain_old, $code_old, $size_old, $head_old, $groups_old, $followups_old, $user_old, $md5_old, $md5_mark, $mid_old ) = 0;
@@ -236,7 +237,7 @@ sub write_access($$)
         my $error_code = $_[0];
         shift @_;
         my @access = @_;
-        my ($host, $time, $pid, $ip, $date, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
+        my ($host, $time, $pid, $ip, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
         my ($expired_messages,$total_messages) = 0;
 
         $total_messages = 1;
@@ -305,7 +306,7 @@ sub write_access($$)
 sub check_rights($)
 {
 	my $arg = $_[0];
-	my ($host, $time, $pid, $ip, $date, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
+	my ($host, $time, $pid, $ip, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
 
 	my %rights;
 

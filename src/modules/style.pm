@@ -19,7 +19,7 @@ our (@nomoderation, @htmlallowed, @htmltags, %extracontent, %forbidden_headers, 
 
 sub style_filter()
 {
-        my ($host, $time, $pid, $ip, $date, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
+        my ($host, $time, $pid, $ip, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
 
 #######################
 # Split Newsgroups and Followup-To
@@ -338,6 +338,8 @@ sub style_filter()
 
         my $client_time = str2time( $hdr{'Date'} );
 	$time 		= time(); 
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+	my $date = "$mday/$mon/$year $hour:$min:$sec";
 
 	if ( $client_time > $time ) # message posted in the future
 	{
@@ -571,7 +573,7 @@ sub style_filter()
 sub mod_headers()
 {
         $modify_headers = 1;
-	my ($host, $time, $pid, $ip, $date, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
+	my ($host, $time, $pid, $ip, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
 
 #######################
 # Organization

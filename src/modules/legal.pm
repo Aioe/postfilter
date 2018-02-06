@@ -10,7 +10,7 @@ our (@nomoderation, @htmlallowed, @htmltags, %extracontent, %forbidden_headers, 
 
 sub legal_summary()
 {
-	my ($host, $time, $pid, $ip, $date, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
+	my ($host, $time, $pid, $ip, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
 	&log( "debug", "Appending legal logs to $config{'file_legal'}" );
 	
         open my $LEGAL, ">>$config{'file_legal'}";

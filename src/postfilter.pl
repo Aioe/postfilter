@@ -24,13 +24,13 @@ our (@nomoderation, @htmlallowed, @htmltags, %extracontent, %forbidden_headers, 
 #                                                          #
 ############################################################
 
-my $use_innconfval	= "false";				# whether to use innconfval in order to determine the right path of
+my $use_innconfval	= "true";				# whether to use innconfval in order to determine the right path of
 								# each file needed by postfilter. If this is set to "false", paths
 								# are read from postingaccess.conf (that in this case is needed to
 								# be properly configured).
 
-my $innconfval 		= "INNCONFVAL";				# not needed if $use_innshellvar eq "false"
-my $config_dir 		= "POSTETCDIR"; 			# used only if $use_innshellvar eq "false"
+my $innconfval 		= "/usr/local/news/bin//innconfval";				# not needed if $use_innshellvar eq "false"
+my $config_dir 		= "/etc/news/postfilter/"; 			# used only if $use_innshellvar eq "false"
 
 my @files	= (						# configuration files that need to be loaded before analyzing each post
 			"postfilter.conf",

@@ -23,7 +23,7 @@ our (@nomoderation, @htmlallowed, @htmltags, %extracontent, %forbidden_headers, 
 
 sub error($)
 {
-	my ($host, $time, $pid, $ip, $date, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
+	my ($host, $time, $pid, $ip, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
         my $error_code = $_[0];
         my $error_string;
 
@@ -116,7 +116,7 @@ sub error($)
 
 sub success()
 {
-	my ($host, $time, $pid, $ip, $date, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
+	my ($host, $time, $pid, $ip, $client_dn, $length, $head_length, $md5, $domain, $gruppi, $followup) = &query_cache_header();
 	&log( "notice", "Message $hdr{'Message-ID'} accepted" );
 
         my $success_response = "";
