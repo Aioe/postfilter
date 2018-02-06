@@ -631,8 +631,6 @@ sub mod_headers()
                 my $nntph = $md5_nph . ".user." . $host;
 		$hdr{'Injection-Info'} =~ /mail-complaints-to="(.+)"/;
 		my $complaint = $1;		
-		$hdr{'Injection-Info'} =~ /posting\-account="(.+)"/;
-		my $postsender = $1;
 		$hdr{'Injection-Info'} =~ /posting\-host="(.+)"/;
                 my $posthost = $1;
 		$hdr{'Injection-Info'} =~ /logging\-data="(.+)"/;
