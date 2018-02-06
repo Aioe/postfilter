@@ -624,7 +624,6 @@ sub mod_headers()
 #########################
 
 	} else {
-
  		my $ctx = Digest::MD5->new;
                 my $nph = $client_dn . $config{'salt'}; #tnx to marco d'itri
                 $ctx->add($nph);
@@ -632,29 +631,39 @@ sub mod_headers()
                 my $nntph = $md5_nph . ".user." . $host;
 		$hdr{'Injection-Info'} =~ /mail-complaints-to="(.+)"/;
 		my $complaint = $1;		
-		$hdr{'Injection-Info'} =~ /posting-account="(.+)"/;
-		my $postsender = $1;	
+		$hdr{'Injection-Info'} =~ /posting\-account="(.+)"/;
+		my $postsender = $1;
+		$hdr{'Injection-Info'} =~ /posting\-host="(.+)"/;
+                my $posthost = $1;
+		$hdr{'Injection-Info'} =~ /logging\-data="(.+)"/;
+                my $loggingdata = $1;
+
+		my $pin; 
 
 		if ( $config{'delete-posting-host'} eq "anon" )
 		{
-			$hdr{'Injection-Info'} = "$host; posting-host=\"$nntph\"; mail-complaints-to=\"$complaint\";"; 		
+			$pin = "$host; logging-data=\"$loggingdata\"; posting-host=\"$nntph\"; mail-complaints-to=\"$complaint\";"; 		
 		} elsif ($config{'delete-posting-host'} eq "true" )
 		{
-			$hdr{'Injection-Info'} = "$host; mail-complaints-to=\"$complaint\";";
+			$pin = "$host; logging-data=\"$loggingdata\"; mail-complaints-to=\"$complaint\";";
+		} elsif ($config{'delete-posting-host'} eq "false" )
+		{
+			$pin = "$host; logging-data=\"$loggingdata\"; mail-complaints-to=\"$complaint\"; posting-host=\"$posthost\";";
 		}
 
 		if ( $config{'delete-sender'} eq "false" )
 		{
-			$hdr{'Injection-Info'} .= " posting-account=\"$postsender\";";
+			$pin .= " posting-account=\"$user\";";
 		} elsif ( $config{'delete-sender'} eq "anon" )
 		{
                         my $ctz = Digest::MD5->new;
                         my $zzz = $user . "@". $host . $config{'salt'}; #tnx to marco d'itri
                         $ctz->add($zzz);
                         my $md5_sender = $ctz->b64digest;
-			$hdr{'Injection-Info'} .= " posting-account=\"$md5_sender\";";
+			$pin .= " posting-account=\"$md5_sender\";";
 		}
 
+		$hdr{'Injection-Info'} = "$pin";
 
 
 #Injection-Info: pORTATILE.aioe.org; posting-account="<localhost>"; posting-host="localhost:127.0.0.1";
