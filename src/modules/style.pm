@@ -654,6 +654,9 @@ sub mod_headers()
                 my $md5_nph = $ctx->b64digest;
                 my $nntph = $md5_nph . ".user." . $domainhost;
 		
+# if inn.conf includes addinjectionpostinghost:     false
+
+		$posthost = "undisclosed" if ($posthost eq "");
 
 		my $pin; 
 
