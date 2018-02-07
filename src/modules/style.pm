@@ -371,21 +371,10 @@ sub style_filter()
 # Invalid Path
 #######################
 
-        if (
-                ( $config{'force_valid_path'} eq "true" ) and
-                (
-                        ( index( $hdr{'Path'}, "!" ) != -1 ) or
-                        ( $hdr{'Path'} =~ /\!.+\!/ ) 
-                )
-           )
+        if ( $config{'force_valid_path'} eq "true" )
         {
-                &log( "err", "Invalid Path ($hdr{'Path'}), rejected" );
-                return 20;
-        } elsif ( $config{'force_valid_path'} eq "force" )
-	{
 		$hdr{'Path'} = "not-for-mail";
-	}
-	
+        } 
 
 #######################
 # Headers oversize
