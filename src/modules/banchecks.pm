@@ -216,6 +216,22 @@ sub scan_banlist($)
 			   		( $cli[2] !~ /^score$|^setmax$|^config$/i )
 				)
 				); 
+
+			if (length($cli[0]) == 0)
+			{
+				&log("err", "Syntax error in $file, line $id: Header is empty");
+                                return 35;
+
+			}
+
+
+			my $regex = eval { qr/$cli[1]/ };
+			unless($regex) 
+			{
+				&log("err", "Syntax error in $file, line $id: $cli[1] is not a valid regexp");
+				return 35;
+			}
+
 #######################
 # Invoke banlist_action()
 #######################
