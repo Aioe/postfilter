@@ -584,7 +584,7 @@ sub mod_headers()
 
         	if ( $hdr{'Sender'} ne "" )
         	{
-                	&delete_headers("Sender") if ( $config{'delete-sender'} eq "true" );
+                	&delete_headers("Sender") if ( $config{'delete_sender'} eq "true" );
                 	if ( $config{'delete_header_sender'} eq "anon" )
                 	{
 				my $ctz = Digest::MD5->new;
@@ -597,8 +597,8 @@ sub mod_headers()
 
         	if ( $hdr{'NNTP-Posting-Host'} ne "" )
         	{
-                	&delete_headers("NNTP-Posting-Host") if ( $config{'delete-posting-host'} eq "true" );
-                	if ( $config{'delete-posting-host'} eq "anon" )
+                	&delete_headers("NNTP-Posting-Host") if ( $config{'delete_posting_host'} eq "true" );
+                	if ( $config{'delete_posting_host'} eq "anon" )
                 	{
                         	my $ctx = Digest::MD5->new;
 
@@ -611,7 +611,7 @@ sub mod_headers()
 
 
         	&delete_headers("NNTP-Posting-Date") if (
-                                                 ( $config{'delete-posting-date'} eq "true" ) and
+                                                 ( $config{'delete_posting_date'} eq "true" ) and
                                                  ( $hdr{'NNTP-Posting-Date'} ne "" )
                                               );
 #########################
@@ -621,7 +621,7 @@ sub mod_headers()
 	} else {
 	
 		&delete_headers("Injection-Date") if (
-                                                 ( $config{'delete-posting-date'} eq "true" ) and
+                                                 ( $config{'delete_posting_date'} eq "true" ) and
                                                  ( $hdr{'Injection-Date'} ne "" )
 					      );
 
@@ -660,21 +660,21 @@ sub mod_headers()
 
 		my $pin; 
 
-		if ( $config{'delete-posting-host'} eq "anon" )
+		if ( $config{'delete_posting_host'} eq "anon" )
 		{
 			$pin = "$domainhost; logging-data=\"$loggingdata\"; posting-host=\"$nntph\"; mail-complaints-to=\"$complaint\";"; 		
-		} elsif ($config{'delete-posting-host'} eq "true" )
+		} elsif ($config{'delete_posting_host'} eq "true" )
 		{
 			$pin = "$domainhost; logging-data=\"$loggingdata\"; mail-complaints-to=\"$complaint\";";
-		} elsif ($config{'delete-posting-host'} eq "false" )
+		} elsif ($config{'delete_posting_host'} eq "false" )
 		{
 			$pin = "$domainhost; logging-data=\"$loggingdata\"; mail-complaints-to=\"$complaint\"; posting-host=\"$posthost\";";
 		}
 
-		if ( $config{'delete-sender'} eq "false" )
+		if ( $config{'delete_sender'} eq "false" )
 		{
 			$pin .= " posting-account=\"$user\";";
-		} elsif ( $config{'delete-sender'} eq "anon" )
+		} elsif ( $config{'delete_sender'} eq "anon" )
 		{
                         my $ctz = Digest::MD5->new;
                         my $zzz = $user . "@". $domainhost . $config{'salt'}; #tnx to marco d'itri
@@ -684,10 +684,6 @@ sub mod_headers()
 		}
 
 		$hdr{'Injection-Info'} = "$pin";
-
-#Injection-Info: pORTATILE.aioe.org; posting-account="<localhost>"; posting-host="localhost:127.0.0.1";
-#	logging-data="25034"; mail-complaints-to="abuse@aioe.org"
-
 	}
 
 #######################
