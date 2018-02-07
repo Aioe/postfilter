@@ -84,17 +84,27 @@ news.debug                      -/var/log/news/news.debug
 	5.2 Check whether postfilter is correctly installed:
 
         	$ perl -wc [pathfilter]/postfilter/postfilter.pl 
-        	$ postfilter-installer -c
+        	$ ./postfilter-installer -c
         	$ su root
-        	$ postfilter-installer -v
+        	$ ./postfilter-installer -v
+	
+	5.5 If installer complaints because it doesn't find innconfval, 
+	    which is needed during installation, its full path has to be 
+	    inserted by hands using -s flag
+	    
+	    	$ su root
+		$ updatedb
+		$ locate innconfval
+		  /news/bin/innconfval
+		$ postfilter-installer -i -s /news/bin/innconfval
 
-	5.3 Restart INND. Please *restart* it instead of reloading the configuration settings.
+	5.4 Restart INND. Please *restart* it instead of reloading the configuration settings.
 
         	$ su root
         	$ rc.news stop
         	$ rc.news start
 
-	5.4 Try to post a test message
+	5.5 Try to post a test message
 
 		$ telnet localhost 119
               >>> Trying 127.0.0.1...
@@ -114,18 +124,18 @@ news.debug                      -/var/log/news/news.debug
 	      >>> 240 Article posted <ha550k$be9$1@aioe-casa.aioe.org>
 
 
-	5.5 Read all news.debug informations related with postfilter
+	5.6 Read all news.debug informations related with postfilter
 
         	$ tail -f /var/log/news/news.debug | grep " filter: "
 
-	5.6 If postfilter complaints about configuration errors, read
+	5.7 If postfilter complaints about configuration errors, read
 
 		$ man postfilter
 		$ man postfilter.conf
 		$ man banlist.conf	
 
 
-	5.7 Those who need help can ask for assistance using:
+	5.8 Those who need help can ask for assistance using:
 
         	* news://news.software.nntp (an USENET newsgroup)
         	* news://nntp.aioe.org/aioe.news.helpdesk (a local group)
