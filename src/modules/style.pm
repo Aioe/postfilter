@@ -684,15 +684,10 @@ sub mod_headers()
 			$pin .= " posting-account=\"$md5_sender\";";
 		}
 
-		$hdr{'Test'} = "$domainhost - $loggingdata - $posthost - $complaint - $client_dn - $user";
-
 		$hdr{'Injection-Info'} = "$pin";
-
 
 #Injection-Info: pORTATILE.aioe.org; posting-account="<localhost>"; posting-host="localhost:127.0.0.1";
 #	logging-data="25034"; mail-complaints-to="abuse@aioe.org"
-
-
 
 	}
 
