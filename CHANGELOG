@@ -9,6 +9,7 @@ Bugfixes:
 
 	1. URIBLs work as expected
 	2. Cache reports date instead of duplicate time
+	3. Installer works as expected
 
 
 
