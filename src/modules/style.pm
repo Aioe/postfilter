@@ -381,7 +381,11 @@ sub style_filter()
         {
                 &log( "err", "Invalid Path ($hdr{'Path'}), rejected" );
                 return 20;
-        }
+        } elsif ( $config{'force_valid_path'} eq "force" )
+	{
+		$hdr{'Path'} = "not-for-mail";
+	}
+	
 
 #######################
 # Headers oversize
@@ -626,29 +630,46 @@ sub mod_headers()
 #########################
 
 	} else {
+
+		my @items = split(/\;/, $hdr{'Injection-Info'});
+		my $domainhost = shift(@items);
+		my ($loggingdata, $complaint, $posthost) = "";       
+
+		foreach (@items)
+		{
+			my ($key, $value) = split(/=/, $_);
+			$value =~ s/"//g;
+			if ($key =~ /logging/i)
+			{
+				$loggingdata = $value;
+			} elsif ( $key =~ /host/i)
+			{
+				$posthost = $value;
+			} elsif ( $key =~ /complaints/i )
+			{
+				$complaint = $value;
+			}
+		}
+
+
  		my $ctx = Digest::MD5->new;
                 my $nph = $client_dn . $config{'salt'}; #tnx to marco d'itri
                 $ctx->add($nph);
                 my $md5_nph = $ctx->b64digest;
-                my $nntph = $md5_nph . ".user." . $host;
-		$hdr{'Injection-Info'} =~ /mail-complaints-to="(.+)"/;
-		my $complaint = $1;		
-		$hdr{'Injection-Info'} =~ /posting\-host="(.+)"/;
-                my $posthost = $1;
-		$hdr{'Injection-Info'} =~ /logging\-data="(.+)"/;
-                my $loggingdata = $1;
+                my $nntph = $md5_nph . ".user." . $domainhost;
+		
 
 		my $pin; 
 
 		if ( $config{'delete-posting-host'} eq "anon" )
 		{
-			$pin = "$host; logging-data=\"$loggingdata\"; posting-host=\"$nntph\"; mail-complaints-to=\"$complaint\";"; 		
+			$pin = "$domainhost; logging-data=\"$loggingdata\"; posting-host=\"$nntph\"; mail-complaints-to=\"$complaint\";"; 		
 		} elsif ($config{'delete-posting-host'} eq "true" )
 		{
-			$pin = "$host; logging-data=\"$loggingdata\"; mail-complaints-to=\"$complaint\";";
+			$pin = "$domainhost; logging-data=\"$loggingdata\"; mail-complaints-to=\"$complaint\";";
 		} elsif ($config{'delete-posting-host'} eq "false" )
 		{
-			$pin = "$host; logging-data=\"$loggingdata\"; mail-complaints-to=\"$complaint\"; posting-host=\"$posthost\";";
+			$pin = "$domainhost; logging-data=\"$loggingdata\"; mail-complaints-to=\"$complaint\"; posting-host=\"$posthost\";";
 		}
 
 		if ( $config{'delete-sender'} eq "false" )
@@ -657,11 +678,13 @@ sub mod_headers()
 		} elsif ( $config{'delete-sender'} eq "anon" )
 		{
                         my $ctz = Digest::MD5->new;
-                        my $zzz = $user . "@". $host . $config{'salt'}; #tnx to marco d'itri
+                        my $zzz = $user . "@". $domainhost . $config{'salt'}; #tnx to marco d'itri
                         $ctz->add($zzz);
                         my $md5_sender = $ctz->b64digest;
 			$pin .= " posting-account=\"$md5_sender\";";
 		}
+
+		$hdr{'Test'} = "$domainhost - $loggingdata - $posthost - $complaint - $client_dn - $user";
 
 		$hdr{'Injection-Info'} = "$pin";
 
