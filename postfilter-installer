@@ -3,6 +3,8 @@
 use strict;
 use Getopt::Std;
 
+my $argc = @ARGV;
+
 my @modules = ( "Net::DNS", "Date::Parse", "Digest ", "Digest::MD5", "Digest::SHA1", "DBI    " );
 
 
@@ -12,21 +14,24 @@ my @locations = (
 			"/usr/lib/news/bin/",  
 			"/usr/bin/", 
 			"/usr/news/bin/", 	     
-			"/news/bin/",  
 			"/bin/",
 			"/opt/bin/",
-			"/opt/news/bin/"			
+			"/opt/news/bin/",
+			"/news/bin/"			
 		);
 
 my $innconfval;
 my ($FILE_IN, $FILE_OUT);
 my %options=();
 my %config;
-getopts("hicdv",\%options);
+getopts("hicdvs:",\%options);
 
+if (defined $options{'s'})
+{
+	$innconfval = $options{'s'};
+}
 
-
-if (defined $options{'h'})
+if (defined $options{'h'} or $argc == 0)
 {
 	&print_help();
 	exit(0);
@@ -38,7 +43,7 @@ if (defined $options{'i'})
 
 #################################################################################
 #										#
-#			    Postfilter 0.8.2 Installer				#
+#			    Postfilter 0.8.3 Installer				#
 #										#
 #################################################################################
 #										#
@@ -80,7 +85,7 @@ if ($> != 0)
         &error("This program must be executed only by root (UID 0) and not by UID $>");
 }
 
-if (defined $options{'i'} or defined $options{'d'} or defined $options{'v'})
+if ((defined $options{'i'} or defined $options{'d'} or defined $options{'v'}) and $innconfval eq "")
 {
 	print "\nChecking where innconfval resides:\n\n";
 
@@ -104,293 +109,292 @@ if (defined $options{'i'} or defined $options{'d'} or defined $options{'v'})
 
 	if ( $tt == 0 )
 	{
-		&error("Installer is not able to find \'innconfval'\: please update the code with the right path");
+		&error("Installer is not able to find \'innconfval'\: please set the right path with -s flag");
 	}
 	else
 	{
 		print "\ninnconfval found at $innconfval\n\n";
 	}
+}
 
-	print "Executing innconfval:\n\n";
+print "Executing innconfval:\n\n";
 
-	my $cli = "$innconfval pathfilter pathspool pathetc pathdb organization mailcmd version";
+my $cli = "$innconfval pathfilter pathspool pathetc pathdb organization mailcmd version";
 
-	my $PIPE;
-	open $PIPE, "$cli|";
-	if (!$PIPE)
+my $PIPE;
+open $PIPE, "$cli|";
+if (!$PIPE)
+{
+	&error("Unable to run innconfval");
+}
+
+my @values = <$PIPE>;
+close $PIPE;
+
+foreach (@values)
+{
+	chop $_;
+}
+
+
+my $pathetc 	= $values[2];
+my $pathfilter	= $values[0];
+my $pathspool   = $values[1];
+
+print "\tINN Version:			$values[6]\n";
+print "\tINN configuration directory:	$pathetc\n";
+print "\tINN filters directory:		$pathfilter\n";
+print "\tINN spool directory:		$pathspool\n";
+print "\tINN Overview Directory:        $values[3]\n";
+print "\tINN Default Organization:	$values[4]\n\n"; 
+
+exit 0 if (defined $options{'d'});
+
+my %innshellvar;
+$innshellvar{'file_active'}     = $values[3] . "/active";
+$innshellvar{'dir_config'}      = $pathetc;
+$innshellvar{'file_badwords'}   = $pathetc . "/badwords.conf";
+$innshellvar{'file_banlist'}    = $pathetc . "/banlist.conf";
+$innshellvar{'file_access'}     = $values[1] . "/postfilter/access.log";
+$innshellvar{'file_legal'}      = $values[1] . "/postfilter/legal.log";
+$innshellvar{'dir_spool'}       = $values[1] . "/postfilter/saved/";
+$innshellvar{'organization'}    = $values[4];
+$innshellvar{'sendmail'}        = $values[5];
+$innshellvar{'dir_filter'}      = $pathfilter;
+$innshellvar{'version'}         = "2.4" if ( $values[6] =~ /2\.4/ );
+$innshellvar{'version'}         = "2.5" if ( $values[6] =~ /2\.5/ );
+$innshellvar{'version'}         = "2.6" if ( $values[6] =~ /2\.6/ );
+
+if ( defined $options{'v'} )
+{
+	print "Searching whether postfilter is installed:\n\n";
+
+	my %locations;
+
+	$locations{'0.7'} = "$pathfilter/postfilter.pl";
+	$locations{'0.8'} = "$pathfilter/postfilter/postfilter.pl";
+
+	foreach (keys %locations)
 	{
-		&error("Unable to run innconfval");
-	}
-
-	my @values = <$PIPE>;
-	close $PIPE;
-
-	foreach (@values)
-	{
-		chop $_;
-	}
-
-
-	my $pathetc 	= $values[2];
-	my $pathfilter	= $values[0];
-	my $pathspool   = $values[1];
-
-	print "\tINN Version:			$values[6]\n";
-	print "\tINN configuration directory:	$pathetc\n";
-	print "\tINN filters directory:		$pathfilter\n";
-	print "\tINN spool directory:		$pathspool\n";
-	print "\tINN Overview Directory:        $values[3]\n";
-	print "\tINN Default Organization:	$values[4]\n\n"; 
-
-	exit 0 if (defined $options{'d'});
-
-	my %innshellvar;
-        $innshellvar{'file_active'}     = $values[3] . "/active";
-        $innshellvar{'dir_config'}      = $pathetc;
-        $innshellvar{'file_badwords'}   = $pathetc . "/badwords.conf";
-        $innshellvar{'file_banlist'}    = $pathetc . "/banlist.conf";
-        $innshellvar{'file_access'}     = $values[1] . "/postfilter/access.log";
-        $innshellvar{'file_legal'}      = $values[1] . "/postfilter/legal.log";
-        $innshellvar{'dir_spool'}       = $values[1] . "/postfilter/saved/";
-        $innshellvar{'organization'}    = $values[4];
-        $innshellvar{'sendmail'}        = $values[5];
-        $innshellvar{'dir_filter'}      = $pathfilter;
-        $innshellvar{'version'}         = "2.4" if ( $values[6] =~ /2\.4/ );
-        $innshellvar{'version'}         = "2.5" if ( $values[6] =~ /2\.5/ );
-
-	if ( defined $options{'v'} )
-	{
-		print "Searching whether postfilter is installed:\n\n";
-
-		my %locations;
-
-		$locations{'0.7'} = "$pathfilter/postfilter.pl";
-		$locations{'0.8'} = "$pathfilter/postfilter/postfilter.pl";
-
-		foreach (keys %locations)
+		print "\tPostfilter $_";
+		if ( -e $locations{$_} )
 		{
-			print "\tPostfilter $_";
-			if ( -e $locations{$_} )
-			{
-				print "\t\t[ OK ]\n";
-			}
-			else
-			{
-				print "\t\t[ NO ]\n";
-			}
+			print "\t\t[ OK ]\n";
 		}
-
-		print "\n";
-
-		exit 0 if (!defined $options{'i'}); 
+		else
+		{
+			print "\t\t[ NO ]\n";
+		}
 	}
 
-	print "Creating postfilter directories (if they don't exist):\n\n";
+	print "\n";
 
-	my $dir = "$pathetc/postfilter/              ";
-	print "\tConfig Directory:\t$dir\t";
-	&create_dir($dir);
-	my $success = &exec_command("chown news.news $dir");
+	exit 0 if (!defined $options{'i'}); 
+}
 
-	$dir = "$pathspool/postfilter/saved/";
-	print "\tSpool Directories:\t$dir\t";
-	&create_dir($dir);
-	$success = &exec_command("chown news.news $dir");
+print "Creating postfilter directories (if they don't exist):\n\n";
 
-	$dir = "$pathfilter/postfilter/       ";
-	print "\tFilter Directory:\t$dir\t";
-	&create_dir($dir);
-	$success = &exec_command("chown news.news $dir");
+my $dir = "$pathetc/postfilter/              ";
+print "\tConfig Directory:\t$dir\t";
+&create_dir($dir);
+my $success = &exec_command("chown news.news $dir");
 
-	$dir = "/usr/share/doc/postfilter/          ";
-	print "\tDocuments Directory:\t$dir\t";
-	&create_dir($dir);
-	$success = &exec_command("chown news.news $dir");
+$dir = "$pathspool/postfilter/saved/";
+print "\tSpool Directories:\t$dir\t";
+&create_dir($dir);
+$success = &exec_command("chown news.news $dir");
+
+$dir = "$pathfilter/postfilter/       ";
+print "\tFilter Directory:\t$dir\t";
+&create_dir($dir);
+$success = &exec_command("chown news.news $dir");
+
+$dir = "/usr/share/doc/postfilter/          ";
+print "\tDocuments Directory:\t$dir\t";
+&create_dir($dir);
+$success = &exec_command("chown news.news $dir");
 
 
-	print "\nTouching files needed by postfilter:\n\n";
+print "\nTouching files needed by postfilter:\n\n";
 
-	my @totouch = ( 
+my @totouch = ( 
 		"$pathspool/postfilter/legal.log",
 		"$pathspool/postfilter/access.log"
-		      );
+	      );
 
-	foreach (@totouch)
-	{
-		print "\t$_\t\t";
-		$success = &exec_command("touch $_", "chown news.news $_" ); 
-		&gprint($success,"Can't touch $_: probably wrong permissions");
-	}
+foreach (@totouch)
+{
+	print "\t$_\t\t";
+	$success = &exec_command("touch $_", "chown news.news $_" ); 
+	&gprint($success,"Can't touch $_: probably wrong permissions");
+}
 
-	print "\nCopying files:\n\n";
+print "\nCopying files:\n\n";
 
-	my $etc   = "$pathetc/postfilter/";
+my $etc   = "$pathetc/postfilter/";
 
-	if ( -e "$pathetc/postfilter/banlist.conf" )
-	{
-		print "\tBackupping existing banlist.conf\t\t";
-		$success = &exec_command("cp $pathetc/postfilter/banlist.conf /tmp/" );
-		&gprint($success,"Can't save config files: probably wrong permissions");
-	}
-
-        if ( -e "$pathetc/postfilter/badwords.conf" )
-        {
-                print "\tBackupping existing badwords.conf\t\t";
-                $success = &exec_command("cp $pathetc/postfilter/badwords.conf /tmp/" );
-                &gprint($success,"Can't save config files: probably wrong permissions");
-        }
-
-
-	print "\tFrom  etc/* to $etc\t\t";
-	$success = &exec_command( "cp -r ./etc/* $etc", "chown news.news -R $etc/*" );
+if ( -e "$pathetc/postfilter/banlist.conf" )
+{
+	print "\tBackupping existing banlist.conf\t\t";
+	$success = &exec_command("cp $pathetc/postfilter/banlist.conf /tmp/" );
 	&gprint($success,"Can't save config files: probably wrong permissions");
+}
 
-	if ( -e "/tmp/banlist.conf" or -e "/tmp/badwords.conf" )
-	{	 
-		print "\tRestoring original configuration files\t\t";
-        	$success = &exec_command("mv /tmp/ba*.conf $pathetc/postfilter/", "chown news.news -R $etc/*" );
-		&gprint($success,"Can't save config files: probably wrong permissions");
-	}
+if ( -e "$pathetc/postfilter/badwords.conf" )
+{
+        print "\tBackupping existing badwords.conf\t\t";
+        $success = &exec_command("cp $pathetc/postfilter/badwords.conf /tmp/" );
+        &gprint($success,"Can't save config files: probably wrong permissions");
+}
+
+print "\tFrom  etc/* to $etc\t\t";
+$success = &exec_command( "cp -r ./etc/* $etc", "chown news.news -R $etc/*" );
+&gprint($success,"Can't save config files: probably wrong permissions");
+
+if ( -e "/tmp/banlist.conf" or -e "/tmp/badwords.conf" )
+{	 
+	print "\tRestoring original configuration files\t\t";
+       	$success = &exec_command("mv /tmp/ba*.conf $pathetc/postfilter/", "chown news.news -R $etc/*" );
+	&gprint($success,"Can't save config files: probably wrong permissions");
+}
 
 
-	my $spool = "$pathfilter/postfilter/";
+my $spool = "$pathfilter/postfilter/";
 
-	print "\tFrom  src/* to $spool\t";
-	$success = &exec_command( "cp -r ./src/* $spool", "chown news.news -R $spool/*" );
-	&gprint($success,"Can't save spool files: probably wrong permissions");
+print "\tFrom  src/* to $spool\t";
+$success = &exec_command( "cp -r ./src/* $spool", "chown news.news -R $spool/*" );
+&gprint($success,"Can't save spool files: probably wrong permissions");
 
-	print "\tFrom  doc/* to /usr/share/doc/postfilter/\t";
-	$success = &exec_command( "cp -r ./doc/* /usr/share/doc/postfilter/", 
+print "\tFrom  doc/* to /usr/share/doc/postfilter/\t";
+$success = &exec_command( "cp -r ./doc/* /usr/share/doc/postfilter/", 
 				  "cp README /usr/share/doc/postfilter/",
 				  "cp C* /usr/share/doc/postfilter/",
 				  "cp LICENSE /usr/share/doc/postfilter/",
 				  "chown news.news -R /usr/share/doc/postfilter/" );
-	&gprint($success,"Can't save doc files: probably wrong permissions");
+&gprint($success,"Can't save doc files: probably wrong permissions");
 
-	print "\tFrom  man/* to /usr/share/man/             \t";
-	$success = &exec_command( "cp -r ./man/* /usr/share/man/" );
-	&gprint($success,"Can't save man pages: probably wrong permissions");
-
-
-        my $rules = "sbin/postlegal";
-        open $FILE_IN,  "$rules" or &error("Unable to read $rules");
-        open $FILE_OUT, ">/tmp/postlegal" or &error("Unable to write temporary file");
-        while ( my $linea = <$FILE_IN> )
-        {
-                $linea =~ s/LEGAL/$innshellvar{'file_legal'}/g;
-                print $FILE_OUT "$linea";
-        }
-
-        close $FILE_IN;
-        close $FILE_OUT;
-
-	$success = &exec_command( "cp -r /tmp/postlegal sbin/" );
+print "\tFrom  man/* to /usr/share/man/             \t";
+$success = &exec_command( "cp -r ./man/* /usr/share/man/" );
+&gprint($success,"Can't save man pages: probably wrong permissions");
 
 
-	print "\tFrom sbin/* to /sbin/                     \t";
-	$success = &exec_command( "chown root sbin/*", "cp -r ./sbin/* /sbin/" );
-	&gprint($success,"Unable to set right permissions to /sbin files");
-
-	print "\nInstall postfilter:\n\n";
-	print "\tReplacing filter_nnrpd.pl\t\t\t";
-
-	my $gh = "$pathfilter/filter_nnrpd.pl";
-
-	if ( !-e $gh )
-	{
-		$success = &exec_command("ln -s $pathfilter/postfilter/postfilter.pl $pathfilter/filter_nnrpd.pl",
-					 "chown news.news $pathfilter/filter_nnrpd.pl" );
-		&gprint($success,"Unable to install postfilter.pl");
-	}
-	else
-	{
-		my $pp = 0;
-		eval { $pp = readlink("$pathfilter/filter_nnrpd.pl") };
-		if (length($pp) >0) # it's a link
-		{
-			$success = &exec_command("rm $pathfilter/filter_nnrpd.pl",
-						 "ln -s $pathfilter/postfilter/postfilter.pl $pathfilter/filter_nnrpd.pl",
-						 "chown news.news $pathfilter/filter_nnrpd.pl" );
-			&gprint($success,"Unable to backup old filter_nnrpd.pl");
-		}
-		else # it's a file
-		{
-			$success = &exec_command("mv $pathfilter/filter_nnrpd.pl $pathfilter/filter_nnrpd-backup.pl",
-						 "ln -s $pathfilter/postfilter/postfilter.pl $pathfilter/filter_nnrpd.pl",
-						 "chown news.news $pathfilter/filter_nnrpd.pl" );
-			&gprint($success,"Unable to backup old filter_nnrpd.pl");
-		}
-
-	}
-
-	print "\tDeleting old files, if they exist\t\t";
-
-	if ( -e "$pathfilter/postfilter.pl" )
-	{
-		$success = &exec_command("rm -rf $pathfilter/modules/ $pathfilter/data/ $pathfilter/postfilter.pl" );
-		&gprint($success,"Unable to delete old files");
-	}
-	else
-	{
-		print "  [ OK ]\n";
-	}
-
-	print "\nConfiguring:\n\n";
-
-	my $postfilter = "$pathfilter/postfilter/postfilter.pl";
-	my $postetcdir = "$pathetc/postfilter/";
-
-	print "\t$postfilter\t";
-
-	open $FILE_IN,  "$postfilter" or die "Unable to read $postfilter";
-	open $FILE_OUT, ">/tmp/postfilter.pl" or die "Unable to write temporary file";
-
-	while ( my $linea = <$FILE_IN> )
-	{
-		$linea =~ s/POSTETCDIR/$postetcdir/g;
-		$linea =~ s/INNCONFVAL/$innconfval/g;
-		print $FILE_OUT "$linea";
-	}
-
-	close $FILE_IN;
-	close $FILE_OUT;
-
-	$success = &exec_command("rm $postfilter",
-				 "mv /tmp/postfilter.pl $postfilter",
-				 "chown news.news $postfilter" );
-	&gprint($success,"Unable to configure postfilter.pl");
-
-	$rules = "$etc/rules.conf";
-	print "\t$rules\t\t";
-	open $FILE_IN,  "$rules" or &error("Unable to read $rules");
-	open $FILE_OUT, ">/tmp/rules.conf" or &error("Unable to write temporary file");
-	while ( my $linea = <$FILE_IN> )
-	{
-        	$linea =~ s/ACTIVE/$innshellvar{'file_active'}/g;
-		$linea =~ s/BADWORDS/$innshellvar{'file_badwords'}/g;
-		$linea =~ s/BANLIST/$innshellvar{'file_banlist'}/g;
-		$linea =~ s/ACCESS/$innshellvar{'file_access'}/g;
-		$linea =~ s/LEGAL/$innshellvar{'file_legal'}/g;
-		$linea =~ s/DIRSPOOL/$innshellvar{'dir_spool'}/g;
-		$linea =~ s/DIRFILTER/$innshellvar{'dir_filter'}/g;
-		$linea =~ s/ORGANIZATION/$innshellvar{'organization'}/g;
-		$linea =~ s/SENDMAIL/$innshellvar{'sendmail'}/g;
-		$linea =~ s/VERZ/$innshellvar{'version'}/g;
-        	print $FILE_OUT "$linea";
-	}
-
-	close $FILE_IN;
-	close $FILE_OUT;
-
-
-	$success = &exec_command("rm $rules", 
-				 "mv /tmp/rules.conf $rules",
-				 "chown news.news $rules" );
-	&gprint($success,"Unable to configure rules.conf");
-
-	print "\n";
-	print "Postfilter was successfully installed\n\n";
+my $rules = "sbin/postlegal";
+open $FILE_IN,  "$rules" or &error("Unable to read $rules");
+open $FILE_OUT, ">/tmp/postlegal" or &error("Unable to write temporary file");
+while ( my $linea = <$FILE_IN> )
+{
+	$linea =~ s/LEGAL/$innshellvar{'file_legal'}/g;
+        print $FILE_OUT "$linea";
 }
+
+close $FILE_IN;
+close $FILE_OUT;
+
+$success = &exec_command( "cp -r /tmp/postlegal sbin/" );
+
+
+print "\tFrom sbin/* to /sbin/                     \t";
+$success = &exec_command( "chown root sbin/*", "cp -r ./sbin/* /sbin/" );
+&gprint($success,"Unable to set right permissions to /sbin files");
+
+print "\nInstall postfilter:\n\n";
+print "\tReplacing filter_nnrpd.pl\t\t\t";
+
+my $gh = "$pathfilter/filter_nnrpd.pl";
+
+if ( !-e $gh )
+{
+	$success = &exec_command("ln -s $pathfilter/postfilter/postfilter.pl $pathfilter/filter_nnrpd.pl",
+				 "chown news.news $pathfilter/filter_nnrpd.pl" );
+	&gprint($success,"Unable to install postfilter.pl");
+}
+else
+{
+	my $pp = 0;
+	eval { $pp = readlink("$pathfilter/filter_nnrpd.pl") };
+	if (length($pp) >0) # it's a link
+	{
+		$success = &exec_command("rm $pathfilter/filter_nnrpd.pl",
+					 "ln -s $pathfilter/postfilter/postfilter.pl $pathfilter/filter_nnrpd.pl",
+					 "chown news.news $pathfilter/filter_nnrpd.pl" );
+		&gprint($success,"Unable to backup old filter_nnrpd.pl");
+	}
+	else # it's a file
+	{
+		$success = &exec_command("mv $pathfilter/filter_nnrpd.pl $pathfilter/filter_nnrpd-backup.pl",
+					 "ln -s $pathfilter/postfilter/postfilter.pl $pathfilter/filter_nnrpd.pl",
+					 "chown news.news $pathfilter/filter_nnrpd.pl" );
+		&gprint($success,"Unable to backup old filter_nnrpd.pl");
+	}
+}
+
+print "\tDeleting old files, if they exist\t\t";
+
+if ( -e "$pathfilter/postfilter.pl" )
+{
+	$success = &exec_command("rm -rf $pathfilter/modules/ $pathfilter/data/ $pathfilter/postfilter.pl" );
+	&gprint($success,"Unable to delete old files");
+}
+else
+{
+	print "  [ OK ]\n";
+}
+
+print "\nConfiguring:\n\n";
+
+my $postfilter = "$pathfilter/postfilter/postfilter.pl";
+my $postetcdir = "$pathetc/postfilter/";
+
+print "\t$postfilter\t";
+
+open $FILE_IN,  "$postfilter" or die "Unable to read $postfilter";
+open $FILE_OUT, ">/tmp/postfilter.pl" or die "Unable to write temporary file";
+
+while ( my $linea = <$FILE_IN> )
+{
+	$linea =~ s/POSTETCDIR/$postetcdir/g;
+	$linea =~ s/INNCONFVAL/$innconfval/g;
+	print $FILE_OUT "$linea";
+}
+
+close $FILE_IN;
+close $FILE_OUT;
+
+$success = &exec_command("rm $postfilter",
+			 "mv /tmp/postfilter.pl $postfilter",
+			 "chown news.news $postfilter" );
+&gprint($success,"Unable to configure postfilter.pl");
+
+$rules = "$etc/rules.conf";
+print "\t$rules\t\t";
+open $FILE_IN,  "$rules" or &error("Unable to read $rules");
+open $FILE_OUT, ">/tmp/rules.conf" or &error("Unable to write temporary file");
+while ( my $linea = <$FILE_IN> )
+{
+       	$linea =~ s/ACTIVE/$innshellvar{'file_active'}/g;
+	$linea =~ s/BADWORDS/$innshellvar{'file_badwords'}/g;
+	$linea =~ s/BANLIST/$innshellvar{'file_banlist'}/g;
+	$linea =~ s/ACCESS/$innshellvar{'file_access'}/g;
+	$linea =~ s/LEGAL/$innshellvar{'file_legal'}/g;
+	$linea =~ s/DIRSPOOL/$innshellvar{'dir_spool'}/g;
+	$linea =~ s/DIRFILTER/$innshellvar{'dir_filter'}/g;
+	$linea =~ s/ORGANIZATION/$innshellvar{'organization'}/g;
+	$linea =~ s/SENDMAIL/$innshellvar{'sendmail'}/g;
+	$linea =~ s/VERZ/$innshellvar{'version'}/g;
+       	print $FILE_OUT "$linea";
+}
+
+close $FILE_IN;
+close $FILE_OUT;
+
+$success = &exec_command("rm $rules", 
+			 "mv /tmp/rules.conf $rules",
+			 "chown news.news $rules" );
+&gprint($success,"Unable to configure rules.conf");
+
+print "\n";
+print "Postfilter was successfully installed\n\n";
+
 
 ####################################
 sub create_dir($)
@@ -433,7 +437,7 @@ EOT
 sub print_help()
 {
 	print <<EOT;
-Postfilter Installer v. 0.8.1 -- Copyright 2009 by Paolo Amoroso (Aioe) <freedom\@aioe.org>
+Postfilter Installer v. 0.8.3 -- Copyright 2009-2018 by Paolo Amoroso (Aioe) <freedom\@aioe.org>
 
 Usage: postfilter-install [options]
 
@@ -443,7 +447,7 @@ Options:
 	-c	Check postfilter dependancies
 	-d	Check INN Directories
 	-v	Verify whether postfilter is installed
-
+	-s file innconfval path
 EOT
 
 }
