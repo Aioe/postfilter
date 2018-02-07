@@ -611,7 +611,7 @@ sub mod_headers()
 
 
         	&delete_headers("NNTP-Posting-Date") if (
-                                                 ( $config{'delete_header_nntp-posting-date'} eq "true" ) and
+                                                 ( $config{'delete-posting-date'} eq "true" ) and
                                                  ( $hdr{'NNTP-Posting-Date'} ne "" )
                                               );
 #########################
@@ -619,6 +619,13 @@ sub mod_headers()
 #########################
 
 	} else {
+	
+		&delete_headers("Injection-Date") if (
+                                                 ( $config{'delete-posting-date'} eq "true" ) and
+                                                 ( $hdr{'Injection-Date'} ne "" )
+					      );
+
+
 
 		my @items = split(/\;/, $hdr{'Injection-Info'});
 		my $domainhost = shift(@items);
