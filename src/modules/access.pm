@@ -267,6 +267,29 @@ sub write_access($$)
 
 	$ip = "stdin" if ($ip eq "");
 
+# if access file doesn't exist...
+
+        if ( !-e $config{'file_access'})
+	{
+		&log( "notice", "$config{'file_access'} doesn't exist");
+
+# try to create it
+
+		open(FW,">$config{'file_access'}");
+		print FW "";
+		close FW;
+
+# if creation doesn't work (due permission problems), return error
+
+		if ( !-e $config{'file_access'})
+		{
+			&log( "err", "Unable to create $config{'file_access'}");
+			return 1;
+		} else {
+			&log( "notice", "$config{'file_access'} created");
+		}
+	}
+
         open my $ACCESS, ">$config{'file_access'}";
         if (!$ACCESS)
         {
