@@ -290,11 +290,8 @@ while ( my $linea = <$FILE_IN> )
 close $FILE_IN;
 close $FILE_OUT;
 
-$success = &exec_command( "cp -r /tmp/postlegal sbin/" );
-
-
 print "\tFrom sbin/* to /sbin/                     \t";
-$success = &exec_command( "chown root:root sbin/postlegal", "cp -ra ./sbin/postlegal /sbin/" );
+$success = &exec_command( "chown root:root /tmp/postlegal", "mv /tmp/postlegal /sbin/" );
 &gprint($success,"Unable to set right permissions to /sbin files");
 
 print "\nInstall postfilter:\n\n";

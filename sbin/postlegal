@@ -5,7 +5,7 @@ use warnings;
 
 use Getopt::Std;
 
-my $file = "/news/spool/postfilter/legal.log";
+my $file = "LEGAL";
 
 my %options=();
 my %config;
