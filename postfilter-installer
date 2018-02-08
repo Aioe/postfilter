@@ -20,7 +20,7 @@ my @locations = (
 			"/news/bin/"			
 		);
 
-my $innconfval;
+my $innconfval = "";
 my ($FILE_IN, $FILE_OUT);
 my %options=();
 my %config;
@@ -294,7 +294,7 @@ $success = &exec_command( "cp -r /tmp/postlegal sbin/" );
 
 
 print "\tFrom sbin/* to /sbin/                     \t";
-$success = &exec_command( "chown root sbin/*", "cp -r ./sbin/* /sbin/" );
+$success = &exec_command( "chown root:root sbin/postlegal", "cp -ra ./sbin/postlegal /sbin/" );
 &gprint($success,"Unable to set right permissions to /sbin files");
 
 print "\nInstall postfilter:\n\n";
