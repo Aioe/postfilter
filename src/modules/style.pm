@@ -572,7 +572,7 @@ sub mod_headers()
 if ( $hdr{'Sender'} ne "" )
 {
 	&delete_headers("Sender") if ( $config{'delete_sender'} eq "true" );
-        if ( $config{'delete_header_sender'} eq "anon" )
+        if ( $config{'delete_sender'} eq "anon" )
         {
         	my $ctz = Digest::MD5->new;
                 my $zzz = $user . "@". $host . $config{'salt'}; #tnx to marco d'itri
@@ -685,10 +685,10 @@ if ( $hdr{'Sender'} ne "" )
 # Modify Path
 #######################
 
-        if ( $config{'force_valid_path'} eq "true" )
+        if ( $config{'delete_path'} eq "true" )
         {
                 $hdr{'Path'} = "not-for-mail";
-        } elsif ( $config{'force_valid_path'} eq "anon" )
+        } elsif ( $config{'delete_path'} eq "anon" )
 	{
 		my $ctx = Digest::MD5->new;
                 my $nph = $client_dn . $config{'salt'}; #tnx to marco d'itri
@@ -697,7 +697,6 @@ if ( $hdr{'Sender'} ne "" )
                 my $cryptip = $md5_nph . ".user." . $host;
 		$hdr{'Path'} = ".POSTED.$cryptip!not-for-mail";
 	}
-
 
 #######################
 # Custom headers
