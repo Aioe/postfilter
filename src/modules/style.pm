@@ -368,15 +368,6 @@ sub style_filter()
 	}
 
 #######################
-# Invalid Path
-#######################
-
-        if ( $config{'force_valid_path'} eq "true" )
-        {
-		$hdr{'Path'} = "not-for-mail";
-        } 
-
-#######################
 # Headers oversize
 #######################
 
@@ -575,6 +566,23 @@ sub mod_headers()
         $hdr{'Organization'} = $config{'organization'} if ( $config{'force_default_organization'} eq "true" );
        
 ######################
+# Sender
+######################
+
+if ( $hdr{'Sender'} ne "" )
+{
+	&delete_headers("Sender") if ( $config{'delete_sender'} eq "true" );
+        if ( $config{'delete_header_sender'} eq "anon" )
+        {
+        	my $ctz = Digest::MD5->new;
+                my $zzz = $user . "@". $host . $config{'salt'}; #tnx to marco d'itri
+                $ctz->add($zzz);
+                my $md5_sender = $ctz->b64digest;
+                $hdr{'Sender'} = $md5_sender;
+        }
+}
+
+######################
 # INN 2.4 & 2.5
 ######################
 
@@ -582,26 +590,12 @@ sub mod_headers()
 	{
 		&delete_headers("X-Trace") if ( $config{'delete_header_x-trace'} eq "true" );
 
-        	if ( $hdr{'Sender'} ne "" )
-        	{
-                	&delete_headers("Sender") if ( $config{'delete_sender'} eq "true" );
-                	if ( $config{'delete_header_sender'} eq "anon" )
-                	{
-				my $ctz = Digest::MD5->new;
-                                my $zzz = $user . "@". $host . $config{'salt'}; #tnx to marco d'itri
-                                $ctz->add($zzz);
-                                my $md5_sender = $ctz->b64digest;
-                        	$hdr{'Sender'} = $md5_sender;
-                	}
-        	}
-
         	if ( $hdr{'NNTP-Posting-Host'} ne "" )
         	{
                 	&delete_headers("NNTP-Posting-Host") if ( $config{'delete_posting_host'} eq "true" );
                 	if ( $config{'delete_posting_host'} eq "anon" )
                 	{
                         	my $ctx = Digest::MD5->new;
-
                         	my $nph = $client_dn . $config{'salt'}; #tnx to marco d'itri
                         	$ctx->add($nph);
                         	my $md5_nph = $ctx->b64digest;
@@ -685,6 +679,25 @@ sub mod_headers()
 
 		$hdr{'Injection-Info'} = "$pin";
 	}
+
+
+#######################
+# Modify Path
+#######################
+
+        if ( $config{'force_valid_path'} eq "true" )
+        {
+                $hdr{'Path'} = "not-for-mail";
+        } elsif ( $config{'force_valid_path'} eq "anon" )
+	{
+		my $ctx = Digest::MD5->new;
+                my $nph = $client_dn . $config{'salt'}; #tnx to marco d'itri
+                $ctx->add($nph);
+                my $md5_nph = $ctx->b64digest;
+                my $cryptip = $md5_nph . ".user." . $host;
+		$hdr{'Path'} = ".POSTED.$cryptip!not-for-mail";
+	}
+
 
 #######################
 # Custom headers
