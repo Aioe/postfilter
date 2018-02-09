@@ -250,7 +250,7 @@ sub style_filter()
                 $lines++;
         }
 
-        if ( $oversized > 0 )
+        if (( $oversized > 0 ) and ($config{'max_line_length'} > 0))
         {
                 &log( "err", "$oversized lines are longer than $config{'max_line_length'}, rejected" );
                 return 12;

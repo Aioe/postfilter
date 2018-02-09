@@ -50,8 +50,15 @@ sub badwords()
                         my ( $regex, $body_score, $subject_score, $comment ) = split( /\:/, $_, 3 );
 
 #######################
-# Update the counter if the currebt rule matches
+# Update the counter if the current rule matches
 #######################
+
+			my $exitus = eval { qr/$regex/ };
+                        unless($exitus)
+			{
+				&log("err", "Syntax error in banlist.conf line $id: $regex is not a valid regex");
+				return 38;
+			}
 
                         if (
                                 ( $regex ne "" ) and

@@ -48,6 +48,7 @@ my @modules = (							# modules that *always* need to be loaded (they're in path
 			"modules/other.pm",
 			"modules/rbl.pm",
 			"modules/style.pm",
+			"modules/checkconfig.pm",
 	      );
 
 
@@ -111,6 +112,18 @@ sub filter_post()
 			&log( "err", "Strange load_config return value: $error_code" );
 			return "Generic filter failure";
 		}
+        }
+
+
+########################
+# Syntax check
+########################
+
+	$error_code = &syntax_check();
+        if ( $error_code != 0 )
+        {
+                $error_string = &error( $error_code );
+                return $error_string;
         }
 
 ########################
