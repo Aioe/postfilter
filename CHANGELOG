@@ -3,14 +3,17 @@ Postfilter 0.8.3
 Enhancements:
 
 	1. full support to INN 2.6
-
+	2. A syntax checker for configuration files
+	3. Installer allows to set innconfval path by hands
 
 Bugfixes:
 
 	1. URIBLs work as expected
 	2. Cache bugfix
 	3. Installer works as expected
-
+	4. Content-Type check now works correctly
+	5. Invalid regexps in banlist.conf and badwords.conf now don't crash the filter
+	
 
 
 Postfilter 0.8.1
