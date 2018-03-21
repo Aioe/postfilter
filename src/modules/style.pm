@@ -142,31 +142,35 @@ sub style_filter()
 
 	my $valid_content = 0;
 
-	if ($hdr{'Content-Type'} =~ /text\/plain/i)
+	if ($hdr{'Content-Type'} ne "")
 	{
-                &log("debug", "Message content type: $hdr{'Content-Type'} is allowed");
-        } else 	{
-        	foreach ( keys %extracontent )
-        	{
-	        	if ( $hdr{'Newsgroups'} =~ /$_/i )
-                	{
-				&log("debug", "Group $_, allowed content types: $extracontent{$_}");
-                        	if ( $hdr{'Content-Type'} !~ /$extracontent{$_}/i )
-                        	{
-                        		&log( "err", "Invalid Content-Type ($hdr{'Content-Type'}) for group $hdr{'Newsgroups'}, rejected" );
-                                	return 5;
-                        	} else {
-					&log("debug", "Group $hdr{'Nessgroups'} allows $hdr{'Content-Type'}");
-					$valid_content = 1;
-					last;
-				}
-                	}
-		}
-		if ($valid_content == 0)
+		if ($hdr{'Content-Type'} =~ /text\/plain/i)
 		{
-			&log( "err", "Invalid Content-Type ($hdr{'Content-Type'}) for group $hdr{'Newsgroups'}, rejected" );
-                        return 5;
+                	&log("debug", "Message content type: $hdr{'Content-Type'} is allowed");
+        	} else 		{
+        		foreach ( keys %extracontent )
+        		{
+	        		if ( $hdr{'Newsgroups'} =~ /$_/i )
+                		{
+					&log("debug", "Group $_, allowed content types: $extracontent{$_}");
+                        		if ( $hdr{'Content-Type'} !~ /$extracontent{$_}/i )
+                        		{
+                        			&log( "err", "Invalid Content-Type ($hdr{'Content-Type'}) for group $hdr{'Newsgroups'}, rejected" );
+                                		return 5;
+                        		} else {
+						&log("debug", "Group $hdr{'Nessgroups'} allows $hdr{'Content-Type'}");
+						$valid_content = 1;
+						last;
+					}
+                		}
+			}
+			if ($valid_content == 0)
+			{
+				&log( "err", "Invalid Content-Type ($hdr{'Content-Type'}) for group $hdr{'Newsgroups'}, rejected" );
+                        	return 5;
+			}
 		}
+		&log("debug", "Message doesn't include Content-Type header");
 	}
 
 #######################
