@@ -88,7 +88,7 @@ news.debug                      -/var/log/news/news.debug
         	$ su root
         	$ ./postfilter-installer -v
 	
-	5.5 If installer complaints because it doesn't find innconfval, 
+	5.3 If installer complaints because it doesn't find innconfval, 
 	    which is needed during installation, its full path has to be 
 	    inserted by hands using -s flag
 	    
