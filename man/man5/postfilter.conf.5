@@ -140,102 +140,105 @@ $config{'allow_yenc'}                      [ 'true' | 'false' ]
 $config{'allow_mail_headers'}              [ 'true' | 'false' ]
 .br
 .B 37.
-$config{'legal_summary'}                   [ 'true' | 'false' ]
+$config{'allow_html'}                      [ 'true' | 'false' ]
 .br
 .B 38.
-$config{'check_distribution'}              [ 'true' | 'false' ]
+$config{'legal_summary'}                   [ 'true' | 'false' ]
 .br
 .B 39.
-$config{'max_followup'}                    Positive, integer, number of allowed groups
+$config{'check_distribution'}              [ 'true' | 'false' ]
 .br
 .B 40.
-$config{'max_groups_difference'}           Positive integer number of groups
+$config{'max_followup'}                    Positive, integer, number of allowed groups
 .br
 .B 41.
-$config{'max_crosspost'}                   Positive, integer, number of allowed groups
+$config{'max_groups_difference'}           Positive integer number of groups
 .br
 .B 42.
-$config{'max_fup_no_crsspt'}               Positive, integer, number of allowed groups
+$config{'max_crosspost'}                   Positive, integer, number of allowed groups
 .br
 .B 43.
-$config{'maximum_multipost'}               an integer positive number
+$config{'max_fup_no_crsspt'}               Positive, integer, number of allowed groups
 .br
 .B 44.
-$config{'md5_hash'}                        [ 'body' | 'basic' | 'complex' | 'all' ]
+$config{'maximum_multipost'}               an integer positive number
 .br
 .B 45.
-$config{'max_body_size'}                   Positive, integer, number of bytes
+$config{'md5_hash'}                        [ 'body' | 'basic' | 'complex' | 'all' ]
 .br
 .B 46.
-$config{'max_head_size'}                   Positive, integer, number of bytes
+$config{'max_body_size'}                   Positive, integer, number of bytes
 .br
 .B 47.
-$config{'max_total_size'}                  Positive, integer, number of bytes
+$config{'max_head_size'}                   Positive, integer, number of bytes
 .br
 .B 48.
-$config{'max_header_length'}               Positive, integer, number of bytes
+$config{'max_total_size'}                  Positive, integer, number of bytes
 .br
 .B 49.
-$config{'max_hierarchies_post'}            Positive, integer, number of hierarchies
+$config{'max_header_length'}               Positive, integer, number of bytes
 .br
 .B 50.
-$config{'max_hierarchies_followup'}        Positive, integer, number of hierarchies
+$config{'max_hierarchies_post'}            Positive, integer, number of hierarchies
 .br
 .B 51.
-$config{'max_quoted_ratio'}                Decimal number between 0 and 1
+$config{'max_hierarchies_followup'}        Positive, integer, number of hierarchies
 .br
 .B 52.
-$config{'max_blank_ratio'}                 Decimal number between 0 and 1
+$config{'max_quoted_ratio'}                Decimal number between 0 and 1
 .br
 .B 53.
-$config{'max_empty_ratio'}                 Decimal number between 0 and 1
+$config{'max_blank_ratio'}                 Decimal number between 0 and 1
 .br
 .B 54.
-$config{'max_grace_time'}                  Integer, positive, number of seconds
+$config{'max_empty_ratio'}                 Decimal number between 0 and 1
 .br
 .B 55.
-$config{'too_old_limit'}                   Integer, positive, number of seconds
+$config{'max_grace_time'}                  Integer, positive, number of seconds
 .br
 .B 56.
-$config{'max_line_length'}                 Integer, positive, number of characters
+$config{'too_old_limit'}                   Integer, positive, number of seconds
 .br
 .B 57.
-$config{'force_default_organization'}      [ 'true' | 'false' ]
+$config{'max_line_length'}                 Integer, positive, number of characters
 .br
 .B 58.
-$config{'delete_header_x-trace'}           [ 'true' | 'false' ]
+$config{'force_default_organization'}      [ 'true' | 'false' ]
 .br
 .B 59.
-$config{'delete_header_sender'}            [ 'true' | 'false' | 'anon' ]
+$config{'delete_header_x-trace'}           [ 'true' | 'false' ]
 .br
 .B 60.
-$config{'delete_header_nntp-posting-host'} [ 'true' | 'false' | 'anon' ]
+$config{'delete_header_sender'}            [ 'true' | 'false' | 'anon' ]
 .br
 .B 61.
-$config{'delete_header_nntp-posting-date'} [ 'true' | 'false' ]
+$config{'delete_header_nntp-posting-host'} [ 'true' | 'false' | 'anon' ]
 .br
 .B 62.
-$config{'delete_header_user-agent'}        [ 'true' | 'false' ]
+$config{'delete_header_nntp-posting-date'} [ 'true' | 'false' ]
 .br
 .B 63.
-$config{'delete_header_x-no-archive'}      [ 'true' | 'false' ]
+$config{'delete_header_user-agent'}        [ 'true' | 'false' ]
 .br
 .B 64.
-$config{'delete_mail_headers'}             [ 'true' | 'false' ]
+$config{'delete_header_x-no-archive'}      [ 'true' | 'false' ]
 .br
 .B 65.
-$config{'delete_custom_headers'}           [ 'true' | 'false' ]
+$config{'delete_mail_headers'}             [ 'true' | 'false' ]
 .br
 .B 66.
-$config{'include_new_headers'}             [ 'true' | 'false' ]
+$config{'delete_custom_headers'}           [ 'true' | 'false' ]
 .br
 .B 67.
-$config{'force_valid_path'}                [ 'true' | 'false' ]
+$config{'include_new_headers'}             [ 'true' | 'false' ]
 .br
 .B 68.
-$config{'add_cancel_lock'}                 [ 'true' | 'false' ]
+$config{'force_valid_path'}                [ 'true' | 'false' ]
 .br
 .B 69.
+$config{'add_cancel_lock'}                 [ 'true' | 'false' ]
+.br
+.B 70.
 $config{'lock_method'}                     [ 'sha1' | 'md5' ]
 .br
 .SH OPTIONS
@@ -563,9 +566,16 @@ This should be always set to 'false'  if it isn't a binary news server.
 Sometimes, the spammers use a mail to news gateway to inject their messages. If this line is set to
 a value of 'false', all messages which include mail headers are rejected by the server. This value is
 safer but it may produce false positives and it prevents the clients from using mail to news gateways.
-
 .br
-.B 37. $config{'legal_summary'} -> [ 'true' | 'false' ]
+.B 37. $config{'allow_html'} -> [ 'true' | 'false' ]
+.br
+.P
+In a few USENET groups, HTML tags inside the body are allowed and they're always accepted by the filter. 
+In all other USENET groups, HTML tags are forbidden but they're used noradays. If $config{"allow_html"}
+is set to "true" HTML tags are allowed in all groups, if it's set to "false" they are allowed only when
+each message is sent to a group that explicity allows them
+.br
+.B 38. $config{'legal_summary'} -> [ 'true' | 'false' ]
 .br
 .P
 Sometimes, a quick log of all accepted messages could be useful. If this key is 'true', for each accepted
@@ -573,7 +583,7 @@ message postfilter writes a line in the file [pathspool]/postfilter/legal.log. E
 source ip address, userid and time. 'False' disables this.
 
 .br
-.B 38. $config{'check_distribution'} -> [ 'true' | 'false' ]
+.B 39. $config{'check_distribution'} -> [ 'true' | 'false' ]
 .br
 .P
 If this key is set to 'true' only the distributions included in the array @distributions (see below)
@@ -581,14 +591,14 @@ can be added by the users. If an user includes an argument of the Distribution h
 included in that array, the script rejects the message. A value of 'false' disables the check.
 
 .br
-.B 39. $config{'max_followup'} -> Positive, integer, number of allowed groups
+.B 40. $config{'max_followup'} -> Positive, integer, number of allowed groups
 .br
 .P
 The maximum number of groups in the 'Followup-To' header is set by this key.
 An acceptable value is 3 groups
 
 .br
-.B 40. $config{'max_groups_difference'} -> Positive integer number of groups
+.B 41. $config{'max_groups_difference'} -> Positive integer number of groups
 .br
 .P
 The maximum differences between the number of groups allowed in the Followup header and in
@@ -596,21 +606,21 @@ the crosspost (Newsgroups). The default value is 0 that sets postfilter to rejec
 include more groups in followup than in crosspost.
 
 .br
-.B 41. $config{'max_crosspost'} -> Positive, integer, number of allowed groups
+.B 42. $config{'max_crosspost'} -> Positive, integer, number of allowed groups
 .br
 .P
 This statement sets how many groups are allowed in the 'Newsgroups' header
 A wise value is 10 (which is the it.* limit)
 
 .br
-.B 42. $config{'max_fup_no_crsspt'} -> Positive, integer, number of allowed groups
+.B 43. $config{'max_fup_no_crsspt'} -> Positive, integer, number of allowed groups
 .br
 .P
 This variable fixes how many groups an user may include in the 'Newsgroups' header if (and
 only if) he doesn't include any group in the 'Followup-To'.
 
 .br
-.B 43. $config{'maximum_multipost'} -> an integer positive number
+.B 44. $config{'maximum_multipost'} -> an integer positive number
 .br
 .P
 Many spambots sends the same post to many groups. This variable allows to set how many articles
@@ -620,7 +630,7 @@ copy. Please note that it's possible to set a different maximum multipost (only 
 domain or UserID separately through postingaccess.conf.
 
 .br
-.B 44. $config{'md5_hash'} -> [ 'body' | 'basic' | 'complex' | 'all' ]
+.B 45. $config{'md5_hash'} -> [ 'body' | 'basic' | 'complex' | 'all' ]
 .br
 .P
 How to generate the MD5 hash that is needed by postfilter to detect multiposts is controlled by this
@@ -631,13 +641,13 @@ Subject and body. 'All' will use Subject, Newsgroups, Followup, From and body (t
 except for authenticated hosts).
 
 .br
-.B 45. $config{'max_body_size'} -> Positive, integer, number of bytes
+.B 46. $config{'max_body_size'} -> Positive, integer, number of bytes
 .br
 .P
 The body of each message has to be smaller than this value.
 
 .br
-.B 46. $config{'max_head_size'} -> Positive, integer, number of bytes
+.B 47. $config{'max_head_size'} -> Positive, integer, number of bytes
 .br
 .P
 This statement sets the maximum headers size (how many bytes the headers may weigh in total).
@@ -646,21 +656,21 @@ allows to reject them. Usually the headers are lighter than 1KB and a value of 2
 much enough.
 
 .br
-.B 47. $config{'max_total_size'} -> Positive, integer, number of bytes
+.B 48. $config{'max_total_size'} -> Positive, integer, number of bytes
 .br
 .P
 The total (headers + body) size of each article has to be smaller than this value. Note that this
 value must be smaller or equal than the number assigned to 'localmaxartsize' inside inn.conf
 
 .br
-.B 48. $config{'max_header_length'} -> Positive, integer, number of bytes
+.B 49. $config{'max_header_length'} -> Positive, integer, number of bytes
 .br
 .P
 This key sets the maximum length that a *single* header can reach. If an article includes an header
 longer than this value (ie. X-Face), it's rejected by the server
 
 .br
-.B 49. $config{'max_hierarchies_post'} -> Positive, integer, number of hierarchies
+.B 50. $config{'max_hierarchies_post'} -> Positive, integer, number of hierarchies
 .br
 .P
 Sometimes the spammers send a single message to many different hierarchies. The maximum number of
@@ -668,33 +678,33 @@ hierarchies which an user may include in the 'Newsgroups' header is set by this 
 is between 1 and 3.
 
 .br
-.B 50. $config{'max_hierarchies_followup'} -> Positive, integer, number of hierarchies
+.B 51. $config{'max_hierarchies_followup'} -> Positive, integer, number of hierarchies
 .br
 .P
 How many hierarchies are allowed in the 'Followup-To' header is fixed by this line.
 
 .br
-.B 51. $config{'max_quoted_ratio'} -> Decimal number between 0 and 1
+.B 52. $config{'max_quoted_ratio'} -> Decimal number between 0 and 1
 .br
 .P
 This statement sets the maximum ratio of quoted lines. A quoted line begins with '>' or '|'. A safe value
 for this key is between 0.6 (60% maximum) and 0.9 (90%).
 
 .br
-.B 52. $config{'max_blank_ratio'} -> Decimal number between 0 and 1
+.B 53. $config{'max_blank_ratio'} -> Decimal number between 0 and 1
 .br
 .P
 How many lines could be blank in each message is fixed by this key. A blank line begins with a series of
 spaces (' ') and it ends with an LFCR without any other character.
 
 .br
-.B 53. $config{'max_empty_ratio'} -> Decimal number between 0 and 1
+.B 54. $config{'max_empty_ratio'} -> Decimal number between 0 and 1
 .br
 .P
 This sets the maximum ratio of empty lines. An empty line contains only an 'LFCR'.
 
 .br
-.B 54. $config{'max_grace_time'} -> Integer, positive, number of seconds
+.B 55. $config{'max_grace_time'} -> Integer, positive, number of seconds
 .br
 .P
 The spammers often send messages with a future date in the 'Date' header. Some newsreaders show the most
@@ -704,20 +714,20 @@ header. A small value may produce false rejections (messages rejected because th
 is misconfigured); a larger one is barely helpful. Due timezone issues this should not set to less than
 
 .br
-.B 55. $config{'too_old_limit'} -> Integer, positive, number of seconds
+.B 56. $config{'too_old_limit'} -> Integer, positive, number of seconds
 .br
 .P
 If an article includes a Date header that is older than the number of seconds set here, that message will
 be rejected. This is useful in order to block articles that are too old. The default value is 259200, 3 days.
 
 .br
-.B 56. $config{'max_line_length'} -> Integer, positive, number of characters
+.B 57. $config{'max_line_length'} -> Integer, positive, number of characters
 .br
 .P
 The maximum line length is set by this key. The USENET rules fix this limit to 80 characters.
 
 .br
-.B 57. $config{'force_default_organization'} -> [ 'true' | 'false' ]
+.B 58. $config{'force_default_organization'} -> [ 'true' | 'false' ]
 .br
 .P
 Sometimes, spammers and trolls add an untrue value for the 'Organization' header in order to cheat the
@@ -727,7 +737,7 @@ default one. A value of 'true' is quite rude (the users have the right to insert
 organizations) but it's safer.
 
 .br
-.B 58. $config{'delete_header_x-trace'} -> [ 'true' | 'false' ]
+.B 59. $config{'delete_header_x-trace'} -> [ 'true' | 'false' ]
 .br
 .P
 NNRPD adds to each locally posted message an header with this scheme:
@@ -736,7 +746,7 @@ If this variable is set to 'true', the 'X-Trace' header is stripped off. A value
 untouched.
 
 .br
-.B 59. $config{'delete_header_sender'} -> [ 'true' | 'false' | 'anon' ]
+.B 60. $config{'delete_header_sender'} -> [ 'true' | 'false' | 'anon' ]
 .br
 .P
 NNRPD adds to each post sent by an authenticated user an header with this scheme:
@@ -745,7 +755,7 @@ If this variable is set to 'anon' the client_domain is replaced with the server 
 anonymous the 'Sender'. A value of 'true' deletes this header; 'false' keeps it untouched;
 
 .br
-.B 60. $config{'delete_header_nntp-posting-host'} -> [ 'true' | 'false' | 'anon' ]
+.B 61. $config{'delete_header_nntp-posting-host'} -> [ 'true' | 'false' | 'anon' ]
 .br
 .P
 If 'addnntppostinghost' is set to 'true' inside inn.conf, NNRPD adds to each locally posted message
@@ -762,7 +772,7 @@ The value of 'true' deletes this header. We recommend to use 'anon' instead of '
 make easier the antispam checks.
 
 .br
-.B 61. $config{'delete_header_nntp-posting-date'} -> [ 'true' | 'false' ]
+.B 62. $config{'delete_header_nntp-posting-date'} -> [ 'true' | 'false' ]
 .br
 .P
 if 'addnntppostingdate' is set to 'true' (see inn.conf(5)), NNRPD adds to every locally posted
@@ -771,7 +781,7 @@ NNTP-Posting-Date: Human readable date and time
 The value of 'true' strips this header off the messages. 'false' keeps it untouched.
 
 .br
-.B 62. $config{'delete_header_user-agent'} -> [ 'true' | 'false' ]
+.B 63. $config{'delete_header_user-agent'} -> [ 'true' | 'false' ]
 .br
 .P
 Every user has the right to include inside his messages an header - 'User-Agent' - which describes his
@@ -780,7 +790,7 @@ bug, a value of 'true' replaces the 'User-Agent' content with 'hidden', a value 
 statement has the same effect also on 'X-Newsreader' header.
 
 .br
-.B 63. $config{'delete_header_x-no-archive'} -> [ 'true' | 'false' ]
+.B 64. $config{'delete_header_x-no-archive'} -> [ 'true' | 'false' ]
 .br
 .P
 X-No-Archive, also known colloquially as xna, is a newsgroup message header field used to prevent a Usenet 
@@ -790,7 +800,7 @@ marked in this way are deleted after a variable amount of time. On the other sid
 more abuses
 
 .br
-.B 64. $config{'delete_mail_headers'} -> [ 'true' | 'false' ]
+.B 65. $config{'delete_mail_headers'} -> [ 'true' | 'false' ]
 .br
 .P
 If a mail to news gateway is running, it's convenient to strip the mail headers off the messages.
@@ -798,21 +808,21 @@ If this key is set to 'true', all mail related headers are removed from each pos
 preserves them.
 
 .br
-.B 65. $config{'delete_custom_headers'} -> [ 'true' | 'false' ]
+.B 66. $config{'delete_custom_headers'} -> [ 'true' | 'false' ]
 .br
 .P
 If this flag is set to 'true' all headers which aren't included in the @saved_headers array (see below)
 are removed from the messages. A value of 'false' preserves them.
 
 .br
-.B 66. $config{'include_new_headers'} -> [ 'true' | 'false' ]
+.B 67. $config{'include_new_headers'} -> [ 'true' | 'false' ]
 .br
 .P
 A value of 'true' adds to every message the custom headers set by %headlist hash (see below). 'False'
 doesn't include them.
 
 .br
-.B 67. $config{'force_valid_path'} -> [ 'true' | 'false' ]
+.B 68. $config{'force_valid_path'} -> [ 'true' | 'false' ]
 .br
 .P
 Several abuser try to preload a forged Path: header in their messages. nnrpd can be configured to strip every
@@ -820,7 +830,7 @@ argument of Path: supplied by the users but it's impossible to reject a message 
 This check implies that strippath must be set to 'false' inside readers.conf
 
 .br
-.B 68. $config{'add_cancel_lock'} -> [ 'true' | 'false' ]
+.B 69. $config{'add_cancel_lock'} -> [ 'true' | 'false' ]
 .br
 .P
 This sets whether postfilter has to add a 'Cancel-Lock' header to each local message. What a cancel lock
@@ -829,7 +839,7 @@ be useful, postfilter *must* be configured to accept control cancel ($config{'al
 supersedes ($config{'allow_supersedes'})
 
 .br
-.B 69. $config{'lock_method'} -> [ 'sha1' | 'md5' ]
+.B 70. $config{'lock_method'} -> [ 'sha1' | 'md5' ]
 .br
 .P
 A Cancel-Lock or Cancel-Key hash can be generated through two different algorithms: md5 or sha1. This flag sets which one
