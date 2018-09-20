@@ -5,6 +5,7 @@ Enhancements:
 	1. full support to INN 2.6
 	2. A syntax checker for configuration files
 	3. Installer allows to set innconfval path by hands
+	4. Added $config{"allow_html"} that sets whether a message with HTML tags is rejected
 
 Bugfixes:
 

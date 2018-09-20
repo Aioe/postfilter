@@ -298,24 +298,32 @@ sub style_filter()
 # HTML tags
 #######################
 
-        my $stat = 0;
 
-        foreach ( @htmlallowed )
-        {
-                $stat = 1 if ( $hdr{'Newsgroups'} =~ /$_/i );
-        }
+	if ($config{"allow_html"} eq "false")
+	{
+        	my $stat = 0;
 
-        if ( $stat == 0 )
-        {
-                foreach ( @htmltags )
-                {
-                        if ( $body =~ /$_/i )
-                        {
-                                &log( "err", "Message includes a forbidden HTML TAG ($_), rejected");
-                                return 16;                              
-                        }
-                }
-        }
+        	foreach ( @htmlallowed )
+        	{
+                	$stat = 1 if ( $hdr{'Newsgroups'} =~ /$_/i );
+        	}
+
+        	if ( $stat == 0 )
+        	{
+                	foreach ( @htmltags )
+                	{
+                        	if ( $body =~ /$_/i )
+                        	{
+                                	&log( "err", "Message includes a forbidden HTML TAG ($_), rejected");
+                                	return 16;                              
+                        	}
+                	}
+        	}
+	}
+	else
+	{
+		&log("debug", "HTML tags in the body are always accepted, skipping HTML check");
+	}
 
 #######################
 # Unexistent groups
