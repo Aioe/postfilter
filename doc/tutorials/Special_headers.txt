@@ -1,0 +1,44 @@
+Postfilter supports some non-standard headers that allow the poster to modify its operation.
+
+1. Distribution: local
+
+Usually, all messages sent by users of this service are transferred  to all other servers that are part of the usenet network 
+and so they can be read by all users regardless of the service they use. 
+However, local clients are allowed to configure this server in such a way as to avoid propagating an article to other usenet 
+sites but to make it still visible to users of this service. This can be done by adding the following header to the message:
+
+Distribution: local
+
+Any message that includes this header will only be visible to local users.
+
+WARNING: in order to use this feature 'newsfeed' file (a innd configuration file) must be changed removing the string  '!local' 
+from entry 'ME'
+ 
+2. Distribution: usenet
+
+If an user replies to a local message that includes the "Distribution: local" header, by default his answer will be made available 
+only to the local clients unless the author explicitly configures the server to trasfer it anyway to the other usenet sites. 
+In other words, this server adds the "Distribution: local" header to all articles that reply to every post that includes it 
+in order to avoid missing articles inside threads of messages. 
+If a local user still wants that the server propagates to other usenet sites his answer to a message that includes  
+"Distribution: local" must add to his article the following header:
+
+Distribution: usenet
+
+Each message that includes the "Distribution: usenet" header will be propagated to other servers that are part of the usenet 
+network even if it is an answer to a message that is available only to local users. 
+
+This header has no effect on messages that would have been propagated anyway.
+
+WARNING: in order to use this feature 'newsfeed' file (a innd configuration file) must be changed removing the string '!local' 
+from entry 'ME'
+ 
+3. X-Server-Commands: forcerejection
+
+This header allows the sender of the message to ask the server to reject it. 
+This feature is useful for developers to test the behavior of their programs when the server rejects a message. 
+It can also be used to verify if the server is working properly. 
+If a client includes this header in a message, the server performs all the usual checks before rejecting that post 
+with a custom error message. So if the message has to be rejected for another reason, the server refuses it as it 
+would do anyway and the string returned by the server to the sender shows the real rejection reason found by the script.
+
