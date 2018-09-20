@@ -219,7 +219,8 @@ print "\nTouching files needed by postfilter:\n\n";
 
 my @totouch = ( 
 		"$pathspool/postfilter/legal.log",
-		"$pathspool/postfilter/access.log"
+		"$pathspool/postfilter/access.log",
+		"$pathspool/postfilter/localdistribution.dat"
 	      );
 
 foreach (@totouch)
