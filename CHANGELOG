@@ -6,6 +6,7 @@ Enhancements:
 	2. A syntax checker for configuration files
 	3. Installer allows to set innconfval path by hands
 	4. Added $config{"allow_html"} that sets whether a message with HTML tags is rejected
+	5. Distribution header is supported (Distribution: local|usenet)
 
 Bugfixes:
 
@@ -14,6 +15,7 @@ Bugfixes:
 	3. Installer works as expected
 	4. Content-Type check now works correctly
 	5. Invalid regexps in banlist.conf and badwords.conf now don't crash the filter
+	6. Messages with non standard chars in the argument of an header are rejected
 	
 
 
