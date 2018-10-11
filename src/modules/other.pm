@@ -193,7 +193,7 @@ sub save_message()
 # File Path
 ########################
 
-        my $file_path = $config{'dir_spool'} . "/" . $file_name;
+        my $file_path = $config{'dir_spool'} . "/saved/" . $file_name;
 
         &log( "notice", "Saving $hdr{'Message-ID'} into $file_path" );
 
@@ -428,6 +428,139 @@ sub check_group_existence($)
 
 	return 0;
 
+}
+
+sub checkuserdb()
+{
+	my $grouptocheck = shift(@_);
+
+	&log("notice", "Message sent to a group ($grouptocheck) protected by userdb");
+
+        my $FILEID;
+        my $fileid = "/etc/news/postfilter/userdb/$grouptocheck.dat";
+
+        $quickref[105] = "Unable to load $fileid";
+        
+	open $FILEID, "$fileid" or return 105;
+        my @fromlist = <$FILEID>;
+        close $FILEID;
+
+        foreach (@fromlist)
+        {
+	        my $ffff = $hdr{'From'};
+                my $gggg = $_;
+                chop($gggg);
+                if ($gggg eq $ffff)
+                {
+        	        &log("notice", "Article sent by a known user: $gggg");
+                        return 0;       
+                }
+	}
+        
+	$quickref[106] = "Non puoi postare su $grouptocheck, contatta usenet\@aioe.org";
+        my $ffgg = $hdr{'From'};
+
+        &log("err", "Message sent by an unknown user: $ffgg");
+
+        return 106;
+}
+
+
+sub save_localdistribution()
+{
+        my $mid = shift(@_);
+        my $news_spool = $config{'dir_spool'} . "/localdistribution.dat";
+        my $expire_time = 86400 * 90;
+        my $current_time = time();
+
+	$quickref[107] = "Unable to write $news_spool";
+
+        if (open(FILE, "$news_spool"))
+        {
+                my @lines = <FILE>;
+                close FILE;
+
+                if (open(FILE, ">", $news_spool))
+                {
+                
+                        foreach(@lines)
+                        {
+                                my ($epoch,$oldmid) = split(/\t/, $_);
+                                print FILE "$epoch\t$oldmid" if ( $epoch > $current_time - $expire_time );
+                        }
+                                
+                        print FILE "$current_time\t$mid\n";
+                        close FILE;             
+                } else {
+                        &log("err", "Impossibile scrivere su $news_spool");       
+                        return 107;
+                }
+        } else {
+                &log("err", "Impossibile aprire $news_spool");
+                return 107;
+        }
+
+        return 0;
+}
+
+
+sub check_localdistribution()
+{
+        my $mid = shift(@_);
+        my $news_spool = $config{'dir_spool'} . "/localdistribution.dat";
+
+        $quickref[107] = "Unable to write $news_spool";
+
+        if (open(FILE, "$news_spool"))
+        {
+                my @lines = <FILE>;
+                close FILE;
+
+                foreach(@lines)
+                {
+                                my ($epoch,$oldmid) = split(/\t/, $_);
+				chop $oldmid;
+				return 1 if ($mid eq $oldmid);
+                }
+        } else {
+                &log("err", "Unable to open $news_spool");
+                return 107;
+        }
+
+        return 0;
+}
+
+sub check_unknownchars()
+{
+	my $head = shift(@_);
+ 	my $string = $hdr{$head};
+        my $DDposition = 1;   # conta l'ennesimo carattere quindi parte da uno
+
+        my @ASCII = unpack("C*", $string);
+
+	&log("debug", "Checking header $head againt invalid chars");
+
+        foreach (@ASCII)
+        {
+                if (
+                        (( $_ >= 32 ) && ( $_ <=  90 )) or
+                        (( $_ >= 94 ) && ( $_ <= 126 )) or
+                        ( $_ == 195 ) or
+			( $_ == 185 ) or
+			( $_ == 178 )
+                   )
+                {
+                        $DDposition++;
+                }
+                else
+                {
+                        $quickref[104] = "Forbidden ($DDposition th) char (ASCII $_) inside $head";
+			&log("err", "Header: $head\: $string .. Invalid $DDposition th char ASCII $_");
+                        return 104;
+                }
+        }
+
+	return 0;
 }
 
 	

@@ -405,7 +405,7 @@ sub load_config
 
                 $innshellvar{'file_access'}   	= $elem[2] . "/postfilter/access.log";
                 $innshellvar{'file_legal'}    	= $elem[2] . "/postfilter/legal.log";
-                $innshellvar{'dir_spool'}     	= $elem[2] . "/postfilter/saved/";
+                $innshellvar{'dir_spool'}     	= $elem[2] . "/postfilter/";
 		$innshellvar{'organization'}  	= $elem[3];
 		$innshellvar{'sendmail'}      	= $elem[4];
 		$innshellvar{'dir_filter'}      = $elem[5];
