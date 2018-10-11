@@ -12,8 +12,7 @@ Postfilter 0.8.3 - README
 
 2. Requirements
 
-	2.1 INN >= 2.4.0 compiled with perl support (--with-perl). It's recommended to use INN >= 2.4.4. Everybody should note that postfilter *is* fully
-	    compatible with INN 2.5 even if some new feature of INN isn't still used.
+	2.1 INN >= 2.4.0 compiled with perl support (--with-perl). It's recommended to use INN >= 2.4.4. 
 
 	Beware! Postfilter could be *not* fully compatible with IPv6 at the moment. 
 
