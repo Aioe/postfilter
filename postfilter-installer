@@ -3,10 +3,10 @@
 use strict;
 use Getopt::Std;
 
+
 my $argc = @ARGV;
 
 my @modules = ( "Net::DNS", "Date::Parse", "Digest ", "Digest::MD5", "Digest::SHA1", "DBI    " );
-
 
 my @locations = ( 
 			"/usr/local/bin/",
