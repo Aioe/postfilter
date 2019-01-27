@@ -1,3 +1,10 @@
+Postfilter 0.9.1
+
+Bugfixes:
+	1. Forbidden ASCII chars detection works properly
+
+
+
 Postfilter 0.8.3
 
 Enhancements:
@@ -30,7 +37,7 @@ Enhancements:
 
 Bugfixes:
  
-       1. Postfilter works with INN 2.5	
+       1. Postfilter works with INN 2.5	and 2.6
 
 
 

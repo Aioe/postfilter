@@ -1,6 +1,6 @@
-# Copyright (c) 2005-2018, Paolo Amoroso (Aioe) <freedom@aioe.org>
+# Copyright (c) 2005-2019, Paolo Amoroso (Aioe) <freedom@aioe.org>
 # All rights reserved.
-# Postfilter version 0.8.3
+# Postfilter version 0.9.1
 
 #!/usr/bin/perl
 

@@ -1,6 +1,6 @@
-# Copyright (c) 2005-2018, Paolo Amoroso (Aioe) <freedom@aioe.org>
+# Copyright (c) 2005-2019, Paolo Amoroso (Aioe) <freedom@aioe.org>
 # All rights reserved.
-# Postfilter (legal.pm) version 0.8.3
+# Postfilter (legal.pm) version 0.9.1
 
 use strict;
 

@@ -1,6 +1,6 @@
-# Copyright (c) 2005-2018, Paolo Amoroso (Aioe) <freedom@aioe.org>
+# Copyright (c) 2005-2019, Paolo Amoroso (Aioe) <freedom@aioe.org>
 # All rights reserved.
-# Postfilter (other.pm) version 0.8.3
+# Postfilter (other.pm) version 0.9.1
 
 use Date::Parse;
 use Digest::MD5;
@@ -549,7 +549,8 @@ sub check_unknownchars()
 			( $_ == 185 ) or
 			( $_ == 178 ) or
 			( $_ ==  10 ) or
-			( $_ ==  91 )
+			( $_ ==  91 ) or
+			( $_ ==  93 )
                    )
                 {
                         $DDposition++;

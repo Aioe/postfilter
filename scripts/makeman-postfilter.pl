@@ -14,7 +14,7 @@ while ( my $line = <FILE> )
 
 print <<EOF;
 
-.TH postfilter.conf 5 "May 3, 2018" "" "Postfilter main configuration file"
+.TH postfilter.conf 5 "May 3, 2019" "" "Postfilter main configuration file"
 
 .SH NAME
 postfilter.conf \- Postfilter main configuration file

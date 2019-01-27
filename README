@@ -1,4 +1,4 @@
-Postfilter 0.8.3 - README
+Postfilter 0.9.1 - README
 
 
 1. Introduction
@@ -6,7 +6,7 @@ Postfilter 0.8.3 - README
 	postfilter is an antispam filter for InterNetNews, a widely used NNTP server. Unlike cleanfeed - which checks *remote* articles, those 
 	messages sent through other sites - postfilter scans *local* posts and tries to reject spam and various abuses. Even if it's designed for 
 	large sites, notably USENET servers, postfilter *can* be safety used also by small or private hosts that need a less strong protection 
-	against abuses.
+	against abuses. 
 
 	Beware! Postfilter can't be used as a cleanfeed replacement: cleanfeed checks *remote* articles, postfilter *local* ones.
 

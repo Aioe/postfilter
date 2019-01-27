@@ -535,7 +535,7 @@ sub print_grouped($$)
 sub print_help()
 {
 	print <<EOT;
-postlegal v. 0.8.3 Copyright 2018 Paolo Amoroso <freedom\@aioe.org>
+postlegal v. 0.9.1 Copyright 2019 Paolo Amoroso <freedom\@aioe.org>
 
 Syntax:
 	postlegal [ -h ]
