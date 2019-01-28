@@ -613,7 +613,7 @@ if ( $hdr{'Sender'} ne "" )
 # INN 2.4 & 2.5
 ######################
 
-	if (($config{'Version'} eq "2.4") or ($config{'Version'} eq "2.5"))
+	if (($config{'version'} eq "2.4") or ($config{'version'} eq "2.5"))
 	{
 		&delete_headers("X-Trace") if ( $config{'delete_header_x-trace'} eq "true" );
 
