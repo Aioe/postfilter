@@ -76,7 +76,7 @@ sub error($)
 		&log( "notice", "Default action on reject is save, saving $hdr{'Message-ID'}" );
 
                 $modify_headers = 1;
-                $hdr{'X-Postfilter-Error'} = "Code " . $error_code;
+                $hdr{'X-Postfilter-Error'} = $error_code;
                 my $success = &save_message();
 		if ( $success != 0 )
 		{

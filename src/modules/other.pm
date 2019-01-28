@@ -182,7 +182,7 @@ sub save_message()
 
         if ( $hdr{'X-Postfilter-Error'} ne "" )
         {
-                $file_name = sprintf( "%02d\.%d", $hdr{'X-Postfilter-Error'}, $time );
+                $file_name = sprintf( "%03d\.%d", $hdr{'X-Postfilter-Error'}, $time );
         }
         else
         {
