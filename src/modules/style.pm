@@ -7,6 +7,7 @@ use Digest::HMAC;
 use Digest;
 use strict;
 
+use Encode::MIME::Header;
 use Encode qw(encode);
 
 our (%hdr, $dbh, @access, $modify_headers, $body, $user, %config, %public_rights_ip, %public_rights_domain, %auth_rights, %ban_limits);
@@ -790,7 +791,7 @@ if ( $hdr{'Sender'} ne "" )
 	foreach( @headers_to_check )
 	{
 		my $result = &check_unknownchars($_);
-		if ($result == 0)
+		if ($result != 0)
 		{
 			my $arg = $hdr{$_};
 			my $dec = encode("MIME-Header", $arg);
