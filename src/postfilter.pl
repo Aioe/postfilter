@@ -12,7 +12,7 @@ use Digest;
 use Digest::MD5;
 use Digest::SHA1;
 use DBI;
-
+use Encode::MIME::Header;
 
 our (%hdr, $dbh, @access, $modify_headers, $body, $user, %config, %public_rights_ip, %public_rights_domain, %auth_rights, %ban_limits);
 our (%headlist, @quickref, @saved_headers, %whitelist, @distributions, %mysql, %forbidden_crosspost, %scoreset, %maxscore);
@@ -29,8 +29,8 @@ my $use_innconfval	= "true";				# whether to use innconfval in order to determin
 								# are read from postingaccess.conf (that in this case is needed to
 								# be properly configured).
 
-my $innconfval 		= "INNCONFVAL";				# not needed if $use_innshellvar eq "false"
-my $config_dir 		= "POSTETCDIR"; 			# used only if $use_innshellvar eq "false"
+my $innconfval 		= "/usr/lib/news/bin//innconfval";				# not needed if $use_innshellvar eq "false"
+my $config_dir 		= "/etc/news/postfilter/"; 			# used only if $use_innshellvar eq "false"
 
 my @files	= (						# configuration files that need to be loaded before analyzing each post
 			"postfilter.conf",

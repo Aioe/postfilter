@@ -7,6 +7,8 @@ use Digest::HMAC;
 use Digest;
 use strict;
 
+use Encode qw(encode);
+
 our (%hdr, $dbh, @access, $modify_headers, $body, $user, %config, %public_rights_ip, %public_rights_domain, %auth_rights, %ban_limits);
 our (%headlist, @quickref, @saved_headers, %whitelist, @distributions, %mysql, %forbidden_crosspost, %scoreset, %maxscore);
 our (@nomoderation, @htmlallowed, @htmltags, %extracontent, %forbidden_headers, @forbidden_groups,%dnsbl,@localip);
@@ -782,13 +784,19 @@ if ( $hdr{'Sender'} ne "" )
 #######################
 
 
-	my @headers_to_check = ( "From", "Newsgroups", "Followup-To", "Subject" );
+	my @headers_to_check = ( "From", "Subject" );
 
 
 	foreach( @headers_to_check )
 	{
 		my $result = &check_unknownchars($_);
-		return $result if ($result != 0);
+		if ($result == 0)
+		{
+			my $arg = $hdr{$_};
+			my $dec = encode("MIME-Header", $arg);
+			$hdr{$_} = $dec;
+			&log("notice", "Replace header $_ with MIME ($dec) version");
+		}
 	}
 
 ######################
