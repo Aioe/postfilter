@@ -24,6 +24,7 @@ Postfilter 0.9.1 - README
 		2.2.4 Digest::HMAC
 		2.2.5 Digest::MD5
 		2.2.6 DBI
+		2.2.7 Encode::MIME::Header
 
 3. Features
 

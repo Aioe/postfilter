@@ -1,9 +1,17 @@
 Postfilter 0.9.1
 
+Enhancements:
+	1. Postfilter requires also Encode::MIME::Header (postfilter.pl and postfilter-installer were updated)
+
 Bugfixes:
-	1. Forbidden ASCII chars detection works properly
 
-
+	1. If the argument of From or Subject header includes a character that is forbidden, argument is converted to MIME format
+	2. In order to check if a user has the right to post the message that is currently checked, postfilter now sums the values 
+	   ​estracted from the current message to those related to messages already sent in the past. 
+	3. Removed useless subroutines inside postfilter.pl
+	4. If postfilter is configured in order to save accepted and/or refused local messages, each post is saved in a file inside
+           [pathspool]/postfilter/saved/ using a name with format [3 digit error code].[UNIX timestamp] if it was rejected or 
+	   00.[UNIX Timestamp] if it was accepted.
 
 Postfilter 0.8.3
 
