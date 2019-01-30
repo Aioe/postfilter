@@ -29,8 +29,8 @@ my $use_innconfval	= "true";				# whether to use innconfval in order to determin
 								# are read from postingaccess.conf (that in this case is needed to
 								# be properly configured).
 
-my $innconfval 		= "INNCONFVAL";				# not needed if $use_innshellvar eq "false"
-my $config_dir 		= "POSTETCDIR"; 			# used only if $use_innshellvar eq "false"
+my $innconfval 		= "/usr/lib/news/bin//innconfval";				# not needed if $use_innshellvar eq "false"
+my $config_dir 		= "/etc/news/postfilter/"; 			# used only if $use_innshellvar eq "false"
 
 my @files	= (						# configuration files that need to be loaded before analyzing each post
 			"postfilter.conf",
@@ -489,54 +489,6 @@ sub log()    # log( severity, string1, string2.... );
 }
 
 
-############################################################
-#                                                          #
-#     In case of link with a wrong nnrpd filter file       #
-#                                                          #
-############################################################
 
 
-############################################################
-#                                                          #
-#     			nnrpd_access.pl			   #
-#                                                          #
-############################################################
 
-
-sub access()
-{
-	&log( "crit", "You're trying to use postfilter as an access rule filter (nnrpd_access.pl)", "Please unlink postfilter.pl from nnrpd_access.pl" );
-
-	my %output;
-	$output{"reject_with"} = "Bad script for access checks (postfilter instead somewhat other script)";
-	return %output;
-}
-
-############################################################
-#                                                          #
-#                        nnrpd_auth.pl                     #
-#                                                          #
-############################################################
-
-
-sub authenticate()
-{
-	&log( "crit", "You're trying to use postfilter as an authentication script (nnrpd_auth.pl)", "Please unlink postfilter.pl from nnrpd_auth.pl" );
-
-	my @output;
-	$output[0] = "403"; # Generic error
-	$output[1] = "Wrong authentication script (postfilter instead some other script)";
-	return @output;
-}
-
-############################################################
-#                                                          #
-#                       filter_innd.pl                     #
-#                                                          #
-############################################################
-
-sub filter_art()
-{
-	&log( "crit", "You're trying to use postfilter as innd filter script: please unlink postfilter.pl from filter_innd.pl", "Warning: article $hdr{'Message-ID'} accepted without any check" );
-	return "";
-}

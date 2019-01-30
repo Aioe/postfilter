@@ -132,6 +132,10 @@ sub access_control($)
 # Scan @access
 #######################
 
+	# Note: CURRENT message MUST be counted here
+	my $mid = $hdr{'Message-ID'};
+	push( @access, "$time\t$ip\t$domain\t0\t$length\t$head_length\t$gruppi\t$followup\t$user\t$md5\t$mid");
+
         foreach ( @access )
         {
                 ( $time_post, $ip_old, $domain_old, $code_old, $size_old, $head_old, $groups_old, $followups_old, $user_old, $md5_old, $mid_old ) = split( "\t", $_, 11 );
@@ -192,6 +196,8 @@ sub access_control($)
                         $access{'max_short_followups'} += $followups_old if ( $time_post > $time - $config{'short_period'} );
                 }
         }
+
+	pop(@access);
 
 #######################
 # Return the hash
@@ -358,9 +364,10 @@ sub check_rights($)
 
         my %access_id = &access_control($arg);
         &log( "notice", "Multipost:  $access_id{'multipost'}" ); 
+
         if ( $access_id{'multipost'} > $config{'maximum_multipost'} )
         {
- 	       &log( "err", "Found $access_id{'multipost'} past articles with the same MD5 hash $md5 (maximum is $config{'maximum_multipost'}), rejected");
+ 	       &log( "notice", "Found $access_id{'multipost'} past articles with the same MD5 hash $md5 (maximum is $config{'maximum_multipost'}), rejected");
                return 30;
         }
 
@@ -370,7 +377,7 @@ sub check_rights($)
 
         foreach ( keys %access_id )
         {
-        	if ( $access_id{$_} >= $rights{$_} )
+        	if ( $access_id{$_} > $rights{$_} )
 		{                
 			my $logerror;
 			if ( $arg eq "IP" )
@@ -386,7 +393,11 @@ sub check_rights($)
 
 			&log( "err", "$logerror $_ is $access_id{$_}, maximum allowed is $rights{$_}, rejected" );
        
- 	                return 30 if ( $_ eq "multipost" );
+ 	                if ( $_ eq "multipost" )
+			{
+				&log( "notice", "Found $access_id{'multipost'} past articles with the same MD5 hash $md5 (maximum is $config{'maximum_multipost'}), rejected");
+				return 30;
+			}
 			
 			if ( $_ eq "max_articles" )
 			{
