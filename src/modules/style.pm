@@ -149,13 +149,13 @@ sub style_filter()
 	{
 		if ($hdr{'Content-Type'} =~ /text\/plain/i)
 		{
-                	&log("debug", "Message content type: $hdr{'Content-Type'} is allowed");
+                	&log("notice", "Message content type: $hdr{'Content-Type'} is allowed");
         	} else 		{
         		foreach ( keys %extracontent )
         		{
 	        		if ( $hdr{'Newsgroups'} =~ /$_/i )
                 		{
-					&log("debug", "Group $_, allowed content types: $extracontent{$_}");
+					&log("notice", "Group $_, allowed content types: $extracontent{$_}");
                         		if ( $hdr{'Content-Type'} !~ /$extracontent{$_}/i )
                         		{
                         			&log( "err", "Invalid Content-Type ($hdr{'Content-Type'}) for group $hdr{'Newsgroups'}, rejected" );
