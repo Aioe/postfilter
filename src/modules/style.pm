@@ -725,7 +725,7 @@ if ( $hdr{'Sender'} ne "" )
                 $ctx->add($nph);
                 my $md5_nph = $ctx->b64digest;
                 my $cryptip = $md5_nph . ".user." . $host;
-		$hdr{'Path'} = ".POSTED.$cryptip!not-for-mail";
+		$hdr{'Path'} = "$cryptip.POSTED!not-for-mail";
 	}
 
 #######################
